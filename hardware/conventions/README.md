@@ -6,6 +6,30 @@ has implemented the following guidelines.
 ## EDA Tooling
 
 - All project files will be in KiCAD 6.x format.
+- A schematic, PCB, and populated Symbol Field Table are the minimum to accept
+  a new design.
+- Supporting material is allowed in the following formats:
+  - Plain text or Markdown for documentation.
+  - PNG or JPEG for images.
+  - Excel in ".xlsx" format for calculators used to generate component values.
+
+## Microprocessor Choice
+
+The project has standardized on Microchip's PIC18[LF] line of microprocessors,
+and all designs will use parts from that line so they can share source code.
+
+For background, here are some of the reasons PIC18[LF] was chosen:
+
+- Parts are generally available worldwide.
+- Parts are cost effective, generally around $1 +- $0.35 in quantities 100+.
+- Small package, low pin-count parts are available for small scale decoders.
+- There are generally multiple pin-compatable processors which can be 
+  substutied, increasing overall avilability.
+- Many commercial decoders already use the PIC16/PIC18 line.
+
+Where possible designs should maximize the number of pin-compatable PIC18[LF]
+chips that will work in an effort to make manufacturing designs cheaper and
+faster.
 
 ## Schematic Conventions
 
@@ -132,7 +156,7 @@ Components should be chosen to maximize availability and minimize cost:
 - SMT parts should be placed one sided only.
   - Smaller scales using the minimum values may use double sided SMT when necessary.
 
-The Symbol Fiend Table should have the following fields populated:
+The Symbol Field Table should have the following fields populated:
 
 - Value: A short value for the part designed to make the schematic readable.
   - Capacitors: 10uF, 100nF, 40pF
