@@ -18,6 +18,8 @@ Mobile Decoder.
   possible to use them in locomotives, but that is not the primary purpose.
 * [hardware/decoders/](hardware/decoders/) directory contains specific
   decoders designed for specific applications.
+* [hardware/README.md](hardware/README.md) contains a full index of all 
+  decoder designs.
 * [software/common/](software/common/) common source code used across all
   decoder implementations.  This is the majority of the DCC processing
   code.
