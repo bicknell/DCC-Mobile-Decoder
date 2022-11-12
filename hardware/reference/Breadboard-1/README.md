@@ -12,6 +12,10 @@ simple as possible.  The design goals were:
 * Have an easy to understand PCB, suitable for teaching.
 * Use low cost components.
 
+## Supporting Material
+
+* [CALCULATIONS.md](CALCULATIONS.md) discussions how component values were determined.
+
 ## Schematic Walkthrough
 
 ### Power Supply
