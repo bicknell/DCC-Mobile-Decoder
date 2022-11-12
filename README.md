@@ -35,6 +35,21 @@ International Public License**, see the file [LICENSE](LICENSE) for
 complete details.
 
 Licenses for commerical use may be negotiated on a case by case basis.
-Please contact project maintainers.
+Please contact project maintainers.  Commercial terms will include:
 
+- A small annual payment that will be used to support the project.
+- Royalty free.
+- A requirement to provide attribution in the instructions and on the
+  packaging.
+
+## Contributing
+
+Please help us!
+
+We would like to have a comprehensive library of hardware decoder designs
+along with software implementations.  We want to enable everyone to build,
+program, and modify their own DCC decoder.
+
+Contributed material must be compatable with our license terms, project
+goals, and project standards.
 
