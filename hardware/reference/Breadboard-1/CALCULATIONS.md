@@ -45,6 +45,7 @@
   - There is also a limit of 100ma chip-wide.
 - R = (5 - 2.9) / 0.005 = 420 Ohms
   - 422 Ohms is a stanard E48 and E96 series resistor value.
+    - 470 Ohms is an extremely common value that might be cheaper.
 
 ### F1-F6 Generic Output
 
@@ -62,6 +63,9 @@
     - R = (30 - 2.9) / 0.020 = 1360
   - Min current is 2ma at min voltage
     - (6 - 2.9) / 1360 = 0.0022
-  - 1330 KOhms is a standard E48 and E96 series resistor value.
+  - 1.33 KOhms is a standard E48 and E96 series resistor value.
+    - 1.2 KOhms is an extremely common value that might be cheaper.
+      - NMRA specifies 27v max, this project prefers 30v for additional margin.
+      - (27 - 2.9) / 1200 = 20ma is within LED specs at NMRA maximum voltage.
 
 
