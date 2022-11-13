@@ -175,6 +175,9 @@ Components should be chosen to maximize availability and minimize cost:
 
 The Symbol Field Table should have the following fields populated:
 
+- Datasheet: A link to a PDF version of the data sheet.
+  - Where available, prefer the manufacturers web site.
+  - If the part is a generic passive compoinent, fill in "Generic Passive".
 - Value: A short value for the part designed to make the schematic readable.
   - Capacitors: 10uF, 100nF, 40pF
   - Resistors: 100 Ohm, 2K3
