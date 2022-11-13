@@ -1,5 +1,18 @@
 # Breadborad-1 Calculations
 
+## Data Sheets
+
+- Micro-processor: [PIC18(L)F2X/45K50](http://ww1.microchip.com/downloads/en/devicedoc/30000684B.pdf)
+  - Specifically a PIC18F25K50-xML.
+- MOSFET: [2N7002KDW](https://datasheet.lcsc.com/lcsc/2111291830_CBI-2N7002KDW-72K_C2919800.pdf)
+  - SOT-23-6, Vds , Generally any 2N7002 should work.
+- Linear Regulator: [AMS1117-5.0](http://www.advanced-monolithic.com/pdf/ds1117.pdf)
+  - Or any pin-compatable knock off.
+- Diodes: [MSK4010](https://datasheet.lcsc.com/lcsc/1912111437_Shikues-MSK4010_C345958.pdf)
+  - SOD-523, 50V, 1A Schottky barrier rectifier diode.
+- LEDs: [BZ-C0805-C2-E1](https://datasheet.lcsc.com/lcsc/2106081833_baizou-BZ-C0805-C2-E1_C2833063.pdf)
+  - 0805, Bright White, 25ma If Max, Vf (center) 2.9v
+
 ## Power Supply
 
 - **DATASHEET:** C11 & C12 10uF capacitors are the data sheet recommendation for an AMS1117-5.0

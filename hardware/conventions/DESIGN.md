@@ -47,6 +47,17 @@ faster.
 - The "bus" function should not be used.
 - Use of subsheets is discouraged, use only when necessary and minimize.
 
+### Symbol Conventions
+
+Generally speaking the "Small" international version of symbols should be used:
+
+- Use R_Small for resistors, not R, R_US, R_Small_US.
+- Use C_Small or C_Polarized_Small for capacitors, not C, C_Polarized, C_Polarized_US, or 
+  C_Polarized_Small_US.
+- Use L_Small for inductors, not L
+- Use Crystal_*_Small for crystals, not Crystal_*
+- Use D_Small for Diodes, not D or D_Filled or D_Small_Filled.
+
 ## Target Board Constraints
 
 The project strives to minimize cost and maximize accessibility of the
