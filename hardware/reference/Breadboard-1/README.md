@@ -12,6 +12,21 @@ simple as possible.  The design goals were:
 * Have an easy to understand PCB, suitable for teaching.
 * Use low cost components.
 
+## Intended Use Case
+
+It is expected that most users would plug this device into a 400 tie point bread board,
+connect an ICSP programmer like a PICKIT4, and power RL and RR from a DCC command station.
+
+In this configuration the board can be used for software development purposes.  It will
+allow software to be loaded onto the PIC, tested against a real DCC signal, and provide
+visual confirmation of the actions being taken.
+
+Functions are exposed to the breadboard so that alternative devices (e.g. grain of wheat
+bulbs, alternative color/shape/intensity LEDs) can be connected and tested.
+
+The motor is exposed to the breadboard so that an actual motor can be connected to test
+motor drive logic.
+
 ## Supporting Material
 
 * [CALCULATIONS.md](CALCULATIONS.md) discussions how component values were determined.
@@ -20,17 +35,15 @@ simple as possible.  The design goals were:
 
 ### Power Supply
 
-Power from the two rails is fed into a bridge rectifier made up of four
-discrete diodes D11-D14.  As DCC is a square wave, the output is nearly but not
-quite continuous DC power with low ripple.  That power is split off
-to drive the motor and functions directly, labeled as +12v (approximate
-N scale voltage).  A linear regulator U11 is used to generate +5v for the
+Power from the two rails is fed into a bridge rectifier made up of
+four discrete diodes D11-D14.  As DCC is a square wave, the output
+is nearly but not quite continuous DC power with low ripple.  That
+power is split off to drive the motor and functions directly, labeled
+as Vdrive.  A linear regulator U11 is used to generate +5v for the
 micro-processor, and has two support capacitors.
 
-*SCALE SPECIFIC NOTES:* Larger scales will use higher voltages, up to 20v for
-G scale.  D11-D14, C11, and U11 must be rated for at least 20% more than the
-highest expected voltage.  Larger scales will also draw more current, up to 3A.
-D11-D14 must be sized to handle the total current draw.
+The project requirements for this design are to operate from 6v to 30v
+of input.
 
 ### Micro-controller
 
@@ -44,21 +57,32 @@ On some PIC processors particular peripherals can only be used on specific pins.
 On all devices inputs and outputs are moved based on the physical layout of the
 chip and shape of the circuit board to make routing easier.
 
+Particular notes on this part:
+
+- The Vref pin can only be pin 2 / RA3.
+- Analog input must be on Port A.
+  - Thus the BackEMF signal must go into a Port A pin.
+- It is acceptable to leave pins 11, 12, and 13 disconnected if not using USB.
+
+
 ### H-Bridge
 
 The H-Bridge controls the current to the motor.  It is driven by a PWM signal generated
 by the micro-controller.  The software generates 4 PWM signals, P1A-P1D, which are used
 to control speed and direction.
 
-The H-bridge is simply 4 high power MOSFETs arranged in an H configuration.  This design
-uses two discrete dual MOSFET chips which is a common arrangement.  Resistors are placed
-on the gate inputs to prevent inrush from damaging the micro-controller. Dodes D31-D24 
-are placed across each MOSFET to disapate any reverse current.
+The H-bridge is simply 4 high power MOSFETs arranged in an H
+configuration.  This design uses two discrete dual MOSFET chips
+each with 1 PNP and 1NPN MOSFET, which is a common arrangement.
+Resistors are placed on the gate inputs to prevent inrush from
+damaging the micro-controller. Dodes D31-D24 are placed across each
+MOSFET to disapate any reverse current.
 
-In order to calculate BackEMF, a 100nf capacitor C31 is added to reduce signal noise.  The
-resistors R33 and R34 then reduce the voltage to an appropriate level for the analog 
-input of the micro-controller.  By monitoring this voltage the micro-controller can
-calculate the load.
+In order to calculate BackEMF, a 100nf capacitor C31 is added to
+reduce signal noise.  The resistors R35 and R36 then reduce the
+voltage to an appropriate level for the analog input of the
+micro-controller.  By monitoring this voltage the micro-controller
+can calculate the load.
 
 ### Functions
 
@@ -72,7 +96,7 @@ Functions F1-F6 are designed to be connected to external device in a "common ano
 confuration.  To ease development this particular design provides both an LED and a 
 connection for an external device.
 
-+12v power is provided as a common anode source.  The MOSFET connects to ground when turned
+Vdrive power is provided as a common anode source.  The MOSFET connects to ground when turned
 on by the micro-processor.  A resistor is provided on the gate of each MOSFET to manage
 inrush current.  In most mobile decoders the resistor and diode combination for an indicator
 light would be omitted.
@@ -87,4 +111,23 @@ At the top of the board J3 provides a 5 pin ICSP header.  It's physical layout h
 designed so that a PICKIT4 programmer can be plugged in directly and will be face up at
 the top of the board.
 
+### Diagnostic LEDs
 
+This decoder is not designed to go into a locomotive.  It's purpose is to teach about
+DCC, and to enable rapid software development.  Because it is unlikely to be in a locomotive,
+diagnostic LEDs have been added to F1-F6 and also the motor output.
+
+For F0-F6 an appropriate LED + Resistor has been added so that there is a visual indicator if
+a function is on or off.
+
+For the motor output a bi-color Red/Green LED with an appropriate resistor has been added
+across the motor output.  The color Red or Green will indicate the motor direction, and the
+LED will vary in intensity from the PWM drive of the motor.
+
+## TODO/Future
+
+- Would exposing a serial (RS232 or USB) interface aid in troubleshooting/development?
+- Is there any value in showing a crystal oscellator?  Generally they should not be necessary
+  for this application.
+- There are 4 unused pins, can they be made to do something valuable for development or 
+  debugging?
