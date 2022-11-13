@@ -19,6 +19,7 @@
 
 - **AMS1117 DATASHEET:** C11 & C12 10uF capacitors are the data sheet 
   recommendation for an AMS1117-5.0
+  - C11 & C12 0805 50V 10uF X5R 10% are generally available.
 - **PROJECT REQUIREMENT:** D11-D14 & C11 must be rated for >= 30V.
   - MSK4010 diodes are rated for 1A.
   - C11 & C12 0805 50V 10uF X5R 10% are generally available.
@@ -33,6 +34,8 @@
   - C22 100nF 20V Vref+ power decoupling on pin 2 / RA3 for analog comparator.
     - 0402 50V 100nF X7R 10% are generally available.
   - R23 10K / C23 100 nF 20V MCLR hold up circuit.
+    - 0402 10K 1% 1/8W are generally available.
+    - 0402 50V 100nF X7R 10% are generally available.
   - Note that the QFN28 package chosen for this project has only a single Vdd/Vss pin pair,
     so only C21 is needed for decoupling.
 - R21 & R22 form a voltage divider to bring the DCC signal in range of the micro-controller: (Note same as BackEMF below)
@@ -46,7 +49,7 @@
     - Check minimum voltage: (6 * 1330) / (6650 + 1330) = 1v
   - **CALCULATE:** Imax = 30v / ((6650 + 1330) = 3.75ma @ 30V = .112 watts
     - 1/8 Watt resistors are sufficient.
-  - 0402 1% 1/8W resistors are generally avalable.
+  - 0402 1.33K & 6.65K 1% 1/8W resistors are generally avalable.
 
 ## H-Bridge
 
@@ -63,7 +66,7 @@
     - **CALCULATE:** R = 5v / 0.025ma = 200 Ohm
       - E48 & E96 standard value of 202 Ohm
       - 220 Ohm is a popular value that may be cheaper.
-    - 0402 1% 1/8W resistors are generally avalable.
+    - 0402 220 1% 1/8W resistors are generally avalable.
 - **PROJECT REQUIREMENT:** D31-D33 Snubbing Diodes must be rated for >= 30V.
 - R35 & R36 BackEMF sense resistors must put max voltage in the 0-5V range of the
   micro-controller: (Note Same as DCC Dividers Above)
@@ -77,7 +80,7 @@
     - Check minimum voltage: (6 * 1330) / (6650 + 1330) = 1v
   - **CALCULATE:** Imax = 30v / ((6650 + 1330) = 3.75ma @ 30V = .112 watts
     - 1/8 Watt resistors are sufficient.
-  - 0402 1% 1/8W resistors are generally avalable.
+  - 0402 1.33K & 6.65K 1% 1/8W resistors are generally avalable.
 - C31 provides high frequency noise reduction, and is determined experimentally.
 
 ## Functions
@@ -94,6 +97,7 @@
   - 422 Ohms is a stanard E48 and E96 series resistor value.
     - 470 Ohms is an extremely common value that might be cheaper.
     - (5 - 2.9) / 470 = 4.4ma, which is acceptable
+    - 0402 470 1% 1/8W resistors are generally available.
 
 ### F1-F6 Generic Output
 
@@ -112,7 +116,7 @@
     - **CALCULATE:** R = 5v / 0.025ma = 200 Ohm
       - E48 & E96 standard value of 202 Ohm
       - 220 Ohm is a popular value that may be cheaper.
-    - 0402 1% 1/8W resistors are generally available.
+    - 0402 220 1% 1/8W resistors are generally available.
 
 ### Diagnostic LEDs
 
