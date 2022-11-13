@@ -55,8 +55,11 @@
 
 - Q31-Q32 MOSFETs
   - **PROJECT REQUIREMENT:** Vgs must be < 5V, as the micro-controller only sources 5v.
+    - HSM0903 is max 2.5v.
   - **PROJECT REQUIREMENT:** Vds must be >= 30V.
+    - HSM0903 is 100V.
   - **PROJECT REQUIREMENT:** Id must be >= 1A.
+    - HSM0903 is 3A.
   - R31-R34 Gate resistors limit inrush current:
     - **PROJECT REQUIREMENT:** Micro-controller runs at 5v.
     - **PIC18F25K50 DATASHEET** *29.1 Absolute Maximum Ratings* 25ma max sunk per pin
@@ -106,8 +109,11 @@
   - **PROJECT REQUIREMENT:** Vdrive max = 30v
   - **PROJECT REQUIREMENT:** Function Max Current = 100ma
   - Vgs must be < 5V, as the micro-controller only sources 5v.
+    - 2N7002KDW is max 2.5v.
   - Vds must be >= 30V.
+    - 2N7002KDW is 60V.
   - Id must be >= 100mA.
+    - 2N7002KDW is 300ma.
   - Gate resistors limit inrush current:
     - **PIC18F25K50 DATASHEET** *29.1 Absolute Maximum Ratings* 25ma max sunk per pin
     - **PIC18F25K50 DATASHEET** *29.1 Absolute Maximum Ratings* 25ma max sourced per pin
