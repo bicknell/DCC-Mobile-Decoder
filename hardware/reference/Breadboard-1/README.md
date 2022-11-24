@@ -12,6 +12,10 @@ simple as possible.  The design goals were:
 * Have an easy to understand PCB, suitable for teaching.
 * Use low cost components.
 
+## 3D Render
+
+![Breadboard-1 3D Render](Breadboard-1.jpg)
+
 ## Intended Use Case
 
 It is expected that most users would plug this device into a 400 tie point bread board,
