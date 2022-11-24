@@ -4082,7 +4082,7 @@
     (property "Datasheet" "Generic Passive" (id 3) (at 102.235 120.65 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Specification" "0402 50V 100nF X7R 10%" (id 4) (at 102.235 120.65 0)
+    (property "Specification" "0402 50V 47nF X7R 10%" (id 4) (at 102.235 120.65 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid 313d7939-b1f4-4f95-8fbf-38d2d1bd0a6a))

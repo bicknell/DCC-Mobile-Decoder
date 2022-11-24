@@ -53,10 +53,13 @@ of input.
 
 ### Micro-controller
 
-A PIC18F24K50-xML processor is used in this design.  PIC processors require minimal
-support components.  C21 is a local bypass capacitor that is placed closed to
-the power pins.  C22 and R11 form a hold up circuit for MCLR which must be kept 
-high during normal operation.  If MCLR drops, the chip will reset.
+A PIC18F24K50-xML processor is used in this design.  PIC processors
+require minimal support components.  C21 is a local bypass capacitor
+that is placed closed to the power pins.  C22 is a bypass capacitor
+on the analog reference input.  C23 and R11 form a hold up circuit
+for MCLR which must be kept high during normal operation.  If MCLR
+drops, the chip will reset. C24 is required on `18F` parts to stabalize
+the internal LDO.
 
 The exact pins used for the various inputs and outputs are a factor of two criteria.
 On some PIC processors particular peripherals can only be used on specific pins.
@@ -69,7 +72,8 @@ Particular notes on this part:
 - Analog input must be on Port A.
   - Thus the BackEMF signal must go into a Port A pin.
 - It is acceptable to leave pins 11, 12, and 13 disconnected if not using USB.
-
+  - We use USB in this design for debugging.
+  - USB would typically not be included in an actual mobile decoder.
 
 ### H-Bridge
 
