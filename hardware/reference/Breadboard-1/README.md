@@ -111,11 +111,18 @@ light would be omitted.
 
 Two 6-pin 0.1" (2.54mm) pin headers are provided for connectivity to a standard bread board.
 The board has been physically designed to connect to the top of a bread board in positions
-1-6 across the middle.  
+1-6 across the middle.  In a typical decoder these would be exposed as solder pads for wire
+connections.
 
 At the top of the board J3 provides a 5 pin ICSP header.  It's physical layout has been
 designed so that a PICKIT4 programmer can be plugged in directly and will be face up at
-the top of the board.
+the top of the board.  In a typical decoder these would be exposed as test points or solder
+pads to allow the board to be programmed via a pogo pin adapter.
+
+A USB Micro-B port has been included.  A typical decoder would not include this port.  For
+software development purposes this port is configured as a serial port allowing the use
+of functions like `printf` or `putc` in the code.  This allows the programmer to extract
+more information during the code debugging phase.
 
 ### Diagnostic LEDs
 
@@ -132,7 +139,6 @@ LED will vary in intensity from the PWM drive of the motor.
 
 ## TODO/Future
 
-- Would exposing a serial (RS232 or USB) interface aid in troubleshooting/development?
 - Is there any value in showing a crystal oscellator?  Generally they should not be necessary
   for this application.
 - There are 4 unused pins, can they be made to do something valuable for development or 
