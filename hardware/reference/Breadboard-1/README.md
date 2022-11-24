@@ -14,6 +14,8 @@ simple as possible.  The design goals were:
 
 ## 3D Render
 
+Actual size: 2" wide x 2.75" tall (not counting pins at top).
+
 ![Breadboard-1 3D Render](Breadboard-1.jpg)
 
 ## Intended Use Case
