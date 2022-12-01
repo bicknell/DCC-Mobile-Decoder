@@ -18,7 +18,8 @@ Names will be made up of the following components:
   - `Athearn`
   - `Atlas`
   - `Kato`
-  - `Generic` - NMRA Stanadardized Connectors
+  - `NMRA` - NMRA Stanadardized Connectors
+  - `Wired` - Wire leads and/or solder pads.
 * Scale
   - `Z` - 1:220
   - `N` - 1:160

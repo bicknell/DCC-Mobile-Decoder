@@ -1,9 +1,11 @@
 # Hardware
 
-## List of Decoder Designs
+## Designs Available
 
-* [reference/Breadboard-1/](reference/Breadboard-1/) reference implementation 
-  designed to be used with a standard 0.1" pitch solderless breadboard.
+* [Reference](reference/) Reference designs are used to understand DCC and develop
+  software.  They are generally not suitable to put in a locomotive.
+* [Decoders](decoders/) Mobile decoders suitable for putting into locomotives designed
+  to work with the same general software as the reference decoders.
 
 ## Relevant NMRA Standards
 
