@@ -6,7 +6,7 @@ DCC Mobile Decoder Reference Implementation Hardware &amp; Software
 An open hardware and software implementation of a NMRA DCC compatable
 Mobile Decoder.
 
-==This project is not yet complete and does not work in its current state.==
+***This project is not yet complete and does not work in its current state.***
 
 ToDo:
   - [ ] Hardware reference design. (Est 90% complete.)
