@@ -2,8 +2,7 @@
 
 ## Data Sheets
 
-- Micro-processor: [PIC18(L)F2X/45K50](http://ww1.microchip.com/downloads/en/devicedoc/30000684B.pdf)
-  - Specifically a PIC18F25K50-xML.
+- Micro-processor: [PIC18F06Q40](https://ww1.microchip.com/downloads/aemDocuments/documents/MCU08/ProductDocuments/DataSheets/PIC18F06-16Q40-Data-Sheet-40002216D.pdf)
 - H-Bridge MOSFETS: [HSM0903](https://datasheet.lcsc.com/lcsc/2110221630_HUASHUO-HSM0903_C2903558.pdf)
   - SOP-8, 1xPNP & 1xNPN, Vdss 100V, Id 3A, Vgs 1.3v min 2.5v max
 - Functions MOSFET: [2N7002KDW](https://datasheet.lcsc.com/lcsc/2111291830_CBI-2N7002KDW-72K_C2919800.pdf)
@@ -28,21 +27,17 @@
 
 ## Micro-controller
 
-- **PIC18F25K50 DATASHEET** *Figure 2-1 Recommended Minimum Connections*
-  - C21 100nF 20V input power decoupling on pins 16/17
-    - 0402 50V 100nF X7R 10% are generally available.
-  - C22 100nF 20V Vref+ power decoupling on pin 2 / RA3 for analog comparator.
+- **PIC18F06Q40 DATASHEET** *Figure 4-1 Recommended Minimum Connections*
+  - C21 100nF 20V decoupling capacitor.
     - 0402 50V 100nF X7R 10% are generally available.
   - R23 10K / C23 100 nF 20V MCLR hold up circuit.
     - 0402 10K 1% 1/8W are generally available.
     - 0402 50V 100nF X7R 10% are generally available.
-  - Note that the QFN28 package chosen for this project has only a single Vdd/Vss pin pair,
-    so only C21 is needed for decoupling.
 - R21 & R22 form a voltage divider to bring the DCC signal in range of the micro-controller: (Note same as BackEMF below)
   - **PROJECT REQUIREMENT:** Vdrive max = 30v
   - **PROJECT REQUIREMENT:** Vdrive min = 6v
-  - **PIC18F25K50 DATASHEET:** *Parameter D001:* Vdd = 5v
-  - **PIC18F25K50 DATASHEET:** *Parameter D141:* Input Low Voltage I/O Port Schmitt Trigger Buffer Max 0.2 * Vdd = 1v
+  - **PIC18F06Q40 DATASHEET:** *Parameter D001:* Vdd = 5v
+  - **PIC18F06Q40 DATASHEET:** *Parameter D141:* Input Low Voltage I/O Port Schmitt Trigger Buffer Max 0.2 * Vdd = 1v
   - **CALCULATE:** Voltage divider equation: 5 = (30 * R2) / (R1 + R2)
     - Select R2 = 1.33K (Value needed for diagnostic LEDs)
     - Result: R1 = 6.65K which is an E96 resistor value.
@@ -62,10 +57,10 @@
     - HSM0903 is 3A.
   - R31-R34 Gate resistors limit inrush current:
     - **PROJECT REQUIREMENT:** Micro-controller runs at 5v.
-    - **PIC18F25K50 DATASHEET** *29.1 Absolute Maximum Ratings* 25ma max sunk per pin
-    - **PIC18F25K50 DATASHEET** *29.1 Absolute Maximum Ratings* 25ma max sourced per pin
-    - **PIC18F25K50 DATASHEET** *29.1 Absolute Maximum Ratings* 110ma max sunk all ports
-    - **PIC18F25K50 DATASHEET** *29.1 Absolute Maximum Ratings* 70ma max sourced all ports
+    - **PIC18F06Q40 DATASHEET** *29.1 Absolute Maximum Ratings* 25ma max sunk per pin
+    - **PIC18F06Q40 DATASHEET** *29.1 Absolute Maximum Ratings* 25ma max sourced per pin
+    - **PIC18F06Q40 DATASHEET** *29.1 Absolute Maximum Ratings* 110ma max sunk all ports
+    - **PIC18F06Q40 DATASHEET** *29.1 Absolute Maximum Ratings* 70ma max sourced all ports
     - **CALCULATE:** R = 5v / 0.025ma = 200 Ohm
       - E48 & E96 standard value of 202 Ohm
       - 220 Ohm is a popular value that may be cheaper.
@@ -75,8 +70,8 @@
   micro-controller: (Note Same as DCC Dividers Above)
   - **PROJECT REQUIREMENT:** Vdrive max = 30v
   - **PROJECT REQUIREMENT:** Vdrive min = 6v
-  - **PIC18F25K50 DATASHEET:** *Parameter D001:* Vdd = 5v
-  - **PIC18F25K50 DATASHEET:** *Parameter D141:* Input Low Voltage I/O Port Schmitt Trigger Buffer Max 0.2 * Vdd = 1v
+  - **PIC18F06Q40 DATASHEET:** *Parameter D001:* Vdd = 5v
+  - **PIC18F06Q40 DATASHEET:** *Parameter D141:* Input Low Voltage I/O Port Schmitt Trigger Buffer Max 0.2 * Vdd = 1v
   - **CALCULATE:** Voltage divider equation: 5 = (30 * R2) / (R1 + R2)
     - Select R2 = 1.33K (Value needed for diagnostic LEDs)
     - Result: R1 = 6.65K which is an E96 resistor value.
@@ -115,10 +110,10 @@
   - Id must be >= 100mA.
     - 2N7002KDW is 300ma.
   - Gate resistors limit inrush current:
-    - **PIC18F25K50 DATASHEET** *29.1 Absolute Maximum Ratings* 25ma max sunk per pin
-    - **PIC18F25K50 DATASHEET** *29.1 Absolute Maximum Ratings* 25ma max sourced per pin
-    - **PIC18F25K50 DATASHEET** *29.1 Absolute Maximum Ratings* 110ma max sunk all ports
-    - **PIC18F25K50 DATASHEET** *29.1 Absolute Maximum Ratings* 70ma max sourced all ports
+    - **PIC18F06Q40 DATASHEET** *29.1 Absolute Maximum Ratings* 25ma max sunk per pin
+    - **PIC18F06Q40 DATASHEET** *29.1 Absolute Maximum Ratings* 25ma max sourced per pin
+    - **PIC18F06Q40 DATASHEET** *29.1 Absolute Maximum Ratings* 110ma max sunk all ports
+    - **PIC18F06Q40 DATASHEET** *29.1 Absolute Maximum Ratings* 70ma max sourced all ports
     - **CALCULATE:** R = 5v / 0.025ma = 200 Ohm
       - E48 & E96 standard value of 202 Ohm
       - 220 Ohm is a popular value that may be cheaper.
