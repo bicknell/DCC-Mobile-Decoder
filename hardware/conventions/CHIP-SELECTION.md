@@ -34,21 +34,24 @@ The following options are available and are all pin compatable:
 
 | Part Number         | Package | Size | RAM  | Max Clock | Temp       | Format |
 | ------------------- | ------- | ---- | ---- | --------- | ---------- | ------ |
-| PIC18F16Q40-I/REB   | VQFN-20 | 3x3  | 64k  | 64Mhz     | -40 - +85  | Tray   |
-| PIC18F16Q40-E/REB   | VQFN-20 | 3x3  | 64k  | 64Mhz     | -40 - +125 | Tray   |
-| PIC18F16Q40T-I/REB  | VQFN-20 | 3x3  | 64k  | 64Mhz     | -40 - +85  | Tape   |
-| PIC18F16Q41-I/REB   | VQFN-20 | 3x3  | 64k  | 64Mhz     | -40 - +85  | Tray   |
-| PIC18F16Q41-E/REB   | VQFN-20 | 3x3  | 64k  | 64Mhz     | -40 - +125 | Tray   |
-| PIC18F16Q41T-I/REB  | VQFN-20 | 3x3  | 64k  | 64Mhz     | -40 - +85  | Tape   |
-| PIC18F15Q40-I/REB   | VQFN-20 | 3x3  | 32k  | 64Mhz     | -40 - +85  | Tray   |
-| PIC18F15Q40-E/REB   | VQFN-20 | 3x3  | 32k  | 64Mhz     | -40 - +125 | Tray   |
-| PIC18F15Q40T-I/REB  | VQFN-20 | 3x3  | 32k  | 64Mhz     | -40 - +85  | Tape   |
-| PIC18F15Q41-I/REB   | VQFN-20 | 3x3  | 32k  | 64Mhz     | -40 - +85  | Tray   |
-| PIC18F15Q41-E/REB   | VQFN-20 | 3x3  | 32k  | 64Mhz     | -40 - +125 | Tray   |
-| PIC18F15Q41T-I/REB  | VQFN-20 | 3x3  | 32k  | 64Mhz     | -40 - +85  | Tape   |
-| PIC18F14Q41-I/REB   | VQFN-20 | 3x3  | 16k  | 64Mhz     | -40 - +85  | Tray   |
-| PIC18F14Q41-E/REB   | VQFN-20 | 3x3  | 16k  | 64Mhz     | -40 - +125 | Tray   |
-| PIC18F14Q41T-I/REB  | VQFN-20 | 3x3  | 16k  | 64Mhz     | -40 - +85  | Tape   |
+| PIC18F16Q40-I/REB   | SSOP-20 | 3x3  | 64k  | 64Mhz     | -40 - +85  | Tray   |
+| PIC18F16Q40-E/REB   | SSOP-20 | 3x3  | 64k  | 64Mhz     | -40 - +125 | Tray   |
+| PIC18F16Q40T-I/REB  | SSOP-20 | 3x3  | 64k  | 64Mhz     | -40 - +85  | Tape   |
+| PIC18F16Q41-I/REB   | SSOP-20 | 3x3  | 64k  | 64Mhz     | -40 - +85  | Tray   |
+| PIC18F16Q41-E/REB   | SSOP-20 | 3x3  | 64k  | 64Mhz     | -40 - +125 | Tray   |
+| PIC18F16Q41T-I/REB  | SSOP-20 | 3x3  | 64k  | 64Mhz     | -40 - +85  | Tape   |
+| PIC18F15Q40-I/REB   | SSOP-20 | 3x3  | 32k  | 64Mhz     | -40 - +85  | Tray   |
+| PIC18F15Q40-E/REB   | SSOP-20 | 3x3  | 32k  | 64Mhz     | -40 - +125 | Tray   |
+| PIC18F15Q40T-I/REB  | SSOP-20 | 3x3  | 32k  | 64Mhz     | -40 - +85  | Tape   |
+| PIC18F15Q41-I/REB   | SSOP-20 | 3x3  | 32k  | 64Mhz     | -40 - +85  | Tray   |
+| PIC18F15Q41-E/REB   | SSOP-20 | 3x3  | 32k  | 64Mhz     | -40 - +125 | Tray   |
+| PIC18F15Q41T-I/REB  | SSOP-20 | 3x3  | 32k  | 64Mhz     | -40 - +85  | Tape   |
+| PIC18F14Q41-I/REB   | SSOP-20 | 3x3  | 16k  | 64Mhz     | -40 - +85  | Tray   |
+| PIC18F14Q41-E/REB   | SSOP-20 | 3x3  | 16k  | 64Mhz     | -40 - +125 | Tray   |
+| PIC18F14Q41T-I/REB  | SSOP-20 | 3x3  | 16k  | 64Mhz     | -40 - +85  | Tape   |
+
+The difference between the Q40 parts and the Q41 parts is that the Q41 parts 
+include a single Operational Amplifier.
 
 ### Larger Scales 
 
@@ -80,16 +83,29 @@ sizes of chips though.
 
 ### Breadboard Designs
 
-For Breadboard designs it can be useful to have USB connectivity.  The following
-chips have built in USB hardware.  Note that the tradeoff is a 48Mhz max clock
-speed.
+Breadboards can use the same chips as scale-size decoders, but typically using
+a larger chip provides more chip availability and also the abilty for users to
+order bare boards and hand solder.
+
+These are SSOP-20 package versions of the N and Z chips.
 
 | Part Number         | Package | Size | RAM  | Max Clock | Temp       | Format |
 | ------------------- | ------- | ---- | ---- | --------- | ---------- | ------ |
-| PIC18F25K50-I/ML    | QFN-28  | 6x6  | 32K  | 48Mhz     | -40 - +85  | Tray   |
-| PIC18F25K50-E/ML    | QFN-28  | 6x6  | 32K  | 48Mhz     | -40 - +125 | Tray   |
-| PIC18F25K50T-I/ML   | QFN-28  | 6x6  | 32K  | 48Mhz     | -40 - +85  | Tape   |
-| PIC18F26K22-E/ML    | QFN-28  | 6x6  | 64K  | 48Mhz     | -40 - +125 | Tray   |
+| PIC18F16Q40-I/SS    | SSOP-20 | 5x7  | 64k  | 64Mhz     | -40 - +85  | Tray   |
+| PIC18F16Q40-E/SS    | SSOP-20 | 5x7  | 64k  | 64Mhz     | -40 - +125 | Tray   |
+| PIC18F16Q40T-I/SS   | SSOP-20 | 5x7  | 64k  | 64Mhz     | -40 - +85  | Tape   |
+| PIC18F16Q41-I/SS    | SSOP-20 | 5x7  | 64k  | 64Mhz     | -40 - +85  | Tray   |
+| PIC18F16Q41-E/SS    | SSOP-20 | 5x7  | 64k  | 64Mhz     | -40 - +125 | Tray   |
+| PIC18F16Q41T-I/SS   | SSOP-20 | 5x7  | 64k  | 64Mhz     | -40 - +85  | Tape   |
+| PIC18F15Q40-I/SS    | SSOP-20 | 5x7  | 32k  | 64Mhz     | -40 - +85  | Tray   |
+| PIC18F15Q40-E/SS    | SSOP-20 | 5x7  | 32k  | 64Mhz     | -40 - +125 | Tray   |
+| PIC18F15Q40T-I/SS   | SSOP-20 | 5x7  | 32k  | 64Mhz     | -40 - +85  | Tape   |
+| PIC18F15Q41-I/SS    | SSOP-20 | 5x7  | 32k  | 64Mhz     | -40 - +85  | Tray   |
+| PIC18F15Q41-E/SS    | SSOP-20 | 5x7  | 32k  | 64Mhz     | -40 - +125 | Tray   |
+| PIC18F15Q41T-I/SS   | SSOP-20 | 5x7  | 32k  | 64Mhz     | -40 - +85  | Tape   |
+| PIC18F14Q41-I/SS    | SSOP-20 | 5x7  | 16k  | 64Mhz     | -40 - +85  | Tray   |
+| PIC18F14Q41-E/SS    | SSOP-20 | 5x7  | 16k  | 64Mhz     | -40 - +125 | Tray   |
+| PIC18F14Q41T-I/SS   | SSOP-20 | 5x7  | 16k  | 64Mhz     | -40 - +85  | Tape   |
 
 ## Project Recommendations
 
@@ -103,10 +119,12 @@ major vendors.
 
 PIC18F16Q41-I/REB, PIC18F16Q41-E/REB, PIC18F16Q41T-I/REB
 
-This part appears to be more often in stock than other options.  2022-11-25.
+These parts appears to be more often in stock than other options.  2022-11-25.
 
 ### Larger Scales
 
 None of the parts currently show good availability. 2022-11-25.
 
 ### Breadboard Designs
+
+The majority of these chips show good availability.  2022-11-25
