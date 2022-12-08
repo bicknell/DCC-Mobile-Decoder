@@ -17,24 +17,25 @@ ToDo:
 ## Layout
 
 * [docs/](docs/) documentation.
-* [hardware/conventions/](hardware/conventions/) has a list of requirements
-  for all hardware implementations so they can work with the common software.
-* [hardware/reference/](hardware/reference/) directory contains reference 
-  implementations of decoder hardware.  These are designed to be easy to
-  understand for teaching purposes, have a physical form factor to make
-  them easy to use for prototyping with standard breadboards.  It my be
-  possible to use them in locomotives, but that is not the primary purpose.
-* [hardware/decoders/](hardware/decoders/) directory contains specific
-  decoders designed for specific applications.
-* [hardware/README.md](hardware/README.md) contains a full index of all 
-  decoder designs.
-* [software/common/](software/common/) common source code used across all
-  decoder implementations.  This is the majority of the DCC processing
-  code.
-* [software/reference/](software/reference/) source code for the reference
-  implementation hardware.
-* [software/decoders/](software/decoders/) source code for specific decoders
-  in [hardware/decoders/](hardware/decoders/).
+* [hardware/](hardware/) contains all materials related to hardware designs.
+  This top level folder also includes a full index of the designs available.
+  * [hardware/conventions/](hardware/conventions/) has a list of requirements
+    for all hardware implementations so they can work with the common software.
+  * [hardware/reference/](hardware/reference/) directory contains reference 
+    implementations of decoder hardware.  These are designed to be easy to
+    understand for teaching purposes, have a physical form factor to make
+    them easy to use for prototyping with standard breadboards.  It my be
+    possible to use them in locomotives, but that is not the primary purpose.
+  * [hardware/decoders/](hardware/decoders/) directory contains specific
+    decoders designed for specific applications.
+* [software/] contains all materials related to software code and build tools.
+  * [software/common/](software/common/) common source code used across all
+    decoder implementations.  This is the majority of the DCC processing
+    code.
+  * [software/reference/](software/reference/) source code for the reference
+    implementation hardware.
+  * [software/decoders/](software/decoders/) source code for specific decoders
+    in [hardware/decoders/](hardware/decoders/).
 
 ## License
 
