@@ -4,23 +4,23 @@
 
 1. Provide a highly documented DCC hardware and software implementation
    suitable for teaching people new to DCC.
-  - High quality documentation.
-  - Hardware designs that are easy to understand, using commonly available
-    components.
-  - Software written in an easy to understand manor, well commented including
-    references to the relevant NMRA documentation.
-  - Be liberal in what is accepted, and conservative in what is sent.  That is,
-    try to allow a wider range of inputs than is required and still function
-    properly, while making sure outputs are in strict compliance with the 
-    specifications.
+   - High quality documentation.
+   - Hardware designs that are easy to understand, using commonly available
+     components.
+   - Software written in an easy to understand manor, well commented including
+     references to the relevant NMRA documentation.
+   - Be liberal in what is accepted, and conservative in what is sent.  That is,
+     try to allow a wider range of inputs than is required and still function
+     properly, while making sure outputs are in strict compliance with the 
+     specifications.
 1. Implement all relevant NMRA DCC __Standards (S)__.
 1. Implement as many NMRA DCC __Recomended Practices (RP)__ as practical.
 1. Where possible, follow the guidance in NMRA DCC __Technical Note (TN)__,  
    __Technical Information (TI)__, and __Technical Reference (TR)__ documents.
 1. Implement decoders that can be used for real world applications.
-  - Prioritize "wired" decoder designs that can be used in a wide range of 
-    products.
-  - Implment locomotive specific designs driven by community interest.
+   - Prioritize "wired" decoder designs that can be used in a wide range of 
+     products.
+   - Implment locomotive specific designs driven by community interest.
 1. Grow a vibrate, open source mobile decoder community.
 
 ## NMRA Standards
