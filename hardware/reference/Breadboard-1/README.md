@@ -11,6 +11,7 @@ simple as possible.  The design goals were:
 * Have an easy to understand schmatic, suitable for teaching.
 * Have an easy to understand PCB, suitable for teaching.
 * Use low cost components.
+* Include serial output capabilities for debugging and teaching.
 
 ## 3D Render
 
@@ -53,27 +54,23 @@ of input.
 
 ### Micro-controller
 
-A PIC18F24K50-xML processor is used in this design.  PIC processors
-require minimal support components.  C21 is a local bypass capacitor
-that is placed closed to the power pins.  C22 is a bypass capacitor
-on the analog reference input.  C23 and R11 form a hold up circuit
-for MCLR which must be kept high during normal operation.  If MCLR
-drops, the chip will reset. C24 is required on `18F` parts to stabalize
-the internal LDO.
+A PIC18F06Q40 processor is used in this design.  PIC processors
+require minimal support components.  C21 is a local bypass/decoupling
+capacitor that is placed closed to the power pins.  C23 and R23
+form a hold up circuit for MCLR which must be kept high during
+normal operation.  If MCLR drops, the chip will reset.  R24 is
+recommended by the datasheet to prevent chip damage when C23
+discharges.
 
-The exact pins used for the various inputs and outputs are a factor of two criteria.
-On some PIC processors particular peripherals can only be used on specific pins.
-On all devices inputs and outputs are moved based on the physical layout of the
-chip and shape of the circuit board to make routing easier.
+The following pins are left in their default locations:
 
-Particular notes on this part:
+- PGD, PGC to ease programming connections.
+- RX, TX, to ease serial connections.
+- MCLR, Vdd, Gnd, cannot be moved.
 
-- The Vref pin can only be pin 2 / RA3.
-- Analog input must be on Port A.
-  - Thus the BackEMF signal must go into a Port A pin.
-- It is acceptable to leave pins 11, 12, and 13 disconnected if not using USB.
-  - We use USB in this design for debugging.
-  - USB would typically not be included in an actual mobile decoder.
+All other connections were placed to make routing the PCB traces
+simpler.
+
 
 ### H-Bridge
 
@@ -123,10 +120,12 @@ designed so that a PICKIT4 programmer can be plugged in directly and will be fac
 the top of the board.  In a typical decoder these would be exposed as test points or solder
 pads to allow the board to be programmed via a pogo pin adapter.
 
-A USB Micro-B port has been included.  A typical decoder would not include this port.  For
-software development purposes this port is configured as a serial port allowing the use
-of functions like `printf` or `putc` in the code.  This allows the programmer to extract
-more information during the code debugging phase.
+A 6 pin female header (optional) using the standard pinout for many
+"USB to TTL Serial" adapters has been included.  A typical decoder
+would not include this port. For software development purposes this
+port is configured as a serial port allowing the use of functions
+like `printf` or `putc` in the code.  This allows the programmer
+to extract more information during the code debugging phase.
 
 ### Diagnostic LEDs
 
@@ -141,9 +140,3 @@ For the motor output a bi-color Red/Green LED with an appropriate resistor has b
 across the motor output.  The color Red or Green will indicate the motor direction, and the
 LED will vary in intensity from the PWM drive of the motor.
 
-## TODO/Future
-
-- Is there any value in showing a crystal oscellator?  Generally they should not be necessary
-  for this application.
-- There are 4 unused pins, can they be made to do something valuable for development or 
-  debugging?
