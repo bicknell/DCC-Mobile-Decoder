@@ -1,26 +1,12 @@
 # Hardware
 
-## Designs Available
-
-* [Reference](reference/) Reference designs are used to understand DCC and develop
+* [Conventions](conventions/) contains documentation of hardware conventions
+  used across all designs in this project.
+* [Reference](reference/) designs are used to understand DCC and develop
   software.  They are generally not suitable to put in a locomotive.
-* [Decoders](decoders/) Mobile decoders suitable for putting into locomotives designed
-  to work with the same general software as the reference decoders.
-
-## Relevant NMRA Standards
-
-* [NMRA Standards and Recommended Practices](https://www.nmra.org/index-nmra-standards-and-recommended-practices), in particular section 9.1 contains all of the DCC details.
-* [S-9.1 Electrical Standards for Digital Command Control](https://www.nmra.org/sites/default/files/standards/sandrp/pdf/s-9.1_electrical_standards_for_digital_command_control_2021.pdf) 
-  contains bit timing information and voltages.
-
-### Reproduced NMRA Standards
-
-Decoders must operate within the following characteristics:
-
-| Scale       | Min V | Nomnial V | Max V | 
-| -----       | ----- | --------- | ----- |
-| N & Smaller | 7     | 12        | 24    |
-| HO/S/O      | 7     | 15        | 27    |
-| G & Larger  | 7     | 18        | 27    |
-
-
+* [Decoders](decoders/) are mobile decoders suitable for putting into 
+  locomotives designed to work with the same general software as the 
+  reference decoders.
+* [KiCad Libraries](kicad_libraries/) contains a symbol and footprint
+  library that contains symbols used by the project that do not come
+  with the stock KiCad distribution.
