@@ -11,6 +11,10 @@ Breadboard-1 reference design.
 
 ## 3D Render
 
+Actual size 9mm x 25mm:
+
+!(Front)[Wired-N-1A-6-1-front.jpg] !(Back)[Wired-N-1A-6-1-back.jpg]
+
 ## Intended Use Case
 
 Used for any hard wired N scale application, from locomotives that do 
