@@ -4,15 +4,18 @@ DCC Mobile Decoder Reference Implementation Hardware &amp; Software
 ## About
 
 An open hardware and software implementation of a NMRA DCC compatable
-Mobile Decoder.
+Mobile Decoder using a PIC18 micro-processor.  The project aims to
+make available a reference implementation of hardware and software to
+facilitate software development, plus one or more decoder designs that
+could be used in actual locomotives.
 
 ***This project is not yet complete and does not work in its current state.***
 
-ToDo:
-  - [ ] Hardware reference design. (Est 90% complete.)
-  - [ ] Initial basic software for reference design. (Est 20% complete.)
+Path to a working decoder:
+  - [ ] Complete Hardware reference design. (Est 90% complete.)
+  - [ ] Initial basic software for reference design. (Est 80% complete.)
   - [ ] Initial real decoder design. (Est 75% complete.)
-  - [ ] Documentation for above. (Est 50% complete.)
+  - [ ] Documentation for above. (Est 60% complete.)
 
 ## Layout
 
@@ -62,3 +65,9 @@ program, and modify their own DCC decoder.
 Contributed material must be compatable with our license terms, project
 goals, and project standards.
 
+In particular we would like to encourage the following:
+
+- New hardware designs for "drop in" decoders.
+- Additional software features that make the software feature competitive
+  with commercial decoders.
+- Additional documentation to help others learn about DCC implementations.
