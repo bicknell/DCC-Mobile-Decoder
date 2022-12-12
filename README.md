@@ -46,10 +46,13 @@ International Public License**, see the file [LICENSE](LICENSE) for
 complete details.
 
 Licenses for commerical use may be negotiated on a case by case basis.
-Please contact project maintainers.  Commercial terms will include:
+Please contact project maintainers.  Any commercial terms negotiated
+will include:
 
-- A small annual payment that will be used to support the project.
-- Royalty free.
+- A licensing term.
+- An annual payments during the term that will be used to support
+  the project.
+- No royalties.
 - A requirement to provide attribution in the instructions and on the
   packaging.
 
