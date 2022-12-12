@@ -31,10 +31,9 @@ Path to a working decoder:
     possible to use them in locomotives, but that is not the primary purpose.
   * [hardware/decoders/](hardware/decoders/) directory contains specific
     decoders designed for specific applications.
-* [software/] contains all materials related to software code and build tools.
+* [software/](software/) contains all materials related to software code and build tools.
   * [software/common/](software/common/) common source code used across all
-    decoder implementations.  This is the majority of the DCC processing
-    code.
+    decoder implementations.  ***FUTURE***
   * [software/reference/](software/reference/) source code for the reference
     implementation hardware.
   * [software/decoders/](software/decoders/) source code for specific decoders
