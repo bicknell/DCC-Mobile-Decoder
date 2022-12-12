@@ -46,3 +46,9 @@ be implemented by this project, these documents serve as general reference mater
 
 * [HARDWARE-FEATURES.md](HARDWARE-FEATURES.md) contains a list of hardware features.
 * [SOFTWARE-FEATURES.md](SOFTWARE-FEATURES.md) contains a list of software features.
+
+## Similar Projects
+
+We love to support the open source community.  Please see [OTHER-PROJECTS.md]
+for a list of similar projects.
+
