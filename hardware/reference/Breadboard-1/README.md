@@ -34,12 +34,13 @@ bulbs, alternative color/shape/intensity LEDs) can be connected and tested.
 The motor is exposed to the breadboard so that an actual motor can be connected to test
 motor drive logic.
 
+## Schematic Walkthrough
+
+View the [Breadboard-1.pdf](Breadboard-1.pdf) schematic without having to open KiCad!
+
 ## Supporting Material
 
 * [CALCULATIONS.md](CALCULATIONS.md) discussions how component values were determined.
-
-## Schematic Walkthrough
-
 ### Power Supply
 
 Power from the two rails is fed into a bridge rectifier made up of
