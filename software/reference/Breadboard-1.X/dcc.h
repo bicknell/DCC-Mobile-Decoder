@@ -58,7 +58,6 @@ char                dcc_mesg[6]           = {0};  // DCC Messages can't be more 
 uint8_t             dcc_len               = 0;    // Length of the DCC message.
 volatile uint8_t    dcc_ready             = 0;    // DCC Message is ready.
 
-
 #ifdef	__cplusplus
 }
 #endif
