@@ -264,8 +264,10 @@ void dcc_decode(void) {
 #if DEBUG_DCC_DECODE_BASELINE    
         printf("Baseline: Broadcast decoder reset!", my_dcc_address, my_dcc_direction, my_dcc_speed);
 #endif
-        cv_factory_defaults();  // Reset all CV's to factory defaults.
-        dcc_initialize();       // Reinitialize the DCC subsystem.
+        my_dcc_speed = 0;
+        my_dcc_speedsteps = 128;
+        my_dcc_direction = 'F';
+        motor_control(my_dcc_speedsteps, my_dcc_speed, my_dcc_direction);
     // Special case, Broadcast Stop Packet
     } else if ((dcc_len == 2) && (dcc_mesg[0] == 0x00) && ((dcc_mesg[1] & 0xC1) == 0xC1)) {
         my_dcc_speed = 0;
