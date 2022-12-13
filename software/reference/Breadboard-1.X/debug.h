@@ -38,7 +38,7 @@ extern "C" {
  * Debugging of CV operations
  */
 #define DEBUG_CV_RESET                 0  // Debug when we reset CV's.
-#define DEBUG_CV_RW                    0  // Debug CV read/write operations.
+#define DEBUG_CV_RW                    1  // Debug CV read/write operations.
     
 /*
  * Debugging of the DCC signal:
@@ -52,7 +52,7 @@ extern "C" {
 #define DEBUG_DCC_DECODE_E_FN          0  // Debug S-9.2.1 2.3.4/5 Function Group Instructions
 #define DEBUG_DCC_DECODE_FEATURE       0  // Debug S-9.2.1 2.3.6 Feature Expansion Instructions
 #define DEBUG_DCC_DECODE_CV            0  // Debug S-9.2.1 2.3.7 Configuration Variable Access
-#define DEBUG_DCC_DECODE_E_NOT_FOR_US  0  // Show packets that are not for us (idle, other addresses).
+#define DEBUG_DCC_DECODE_NOT_FOR_US    0  // Show packets that are not for us (idle, other addresses).
 
 /*
  * Debugging of hardware operations

@@ -103,55 +103,20 @@ void main(void)
         TMR0_Initialize();
         TMR0_StartTimer();
         
-        // Wait for TMR0 to go off
+        // Loop until TMR0 goes off.
         while(!TMR0_HasOverflowOccured()) {
-            // Is there anything to do during idle time?
-            dcc_idle();
-            
             // Did a DCC packet come in?
             if (dcc_ready) {
-                uint8_t xor = 0;
-
-                // Compute checksum.
-                for (uint8_t idx = 0; idx < dcc_len; ++idx) {
-                    xor ^= dcc_mesg[idx];
-                }
-
-#if DEBUG_DCC_PACKET
-                // Do not print newline if passing, so decode is on the same line.
-                printf("Rec %02x %02x %02x %02x %02x %02x (%d) %s",
-                        dcc_mesg[0], dcc_mesg[1], dcc_mesg[2],
-                        dcc_mesg[3], dcc_mesg[4], dcc_mesg[5],
-                        dcc_len, xor ? "FAIL\r\n" : "PASS: ");
-#endif
-                // If the checksum was good, decode the message.
-                if (xor == 0) {
-                    dcc_decode();
-// This has gotten ugly, need to rethink.
-#if DEBUG_DCC_PACKET || DEBUG_DCC_DECODE_BASELINE || DEBUG_DCC_DECODE_EXTENDED || \
-    DEBUG_DCC_DECODE_DECODER || DEBUG_DCC_DECODE_ADV_OPS || DEBUG_DCC_DECODE_SPEED || \
-    DEBUG_DCC_DECODE_E_FN || DEBUG_DCC_DECODE_FEATURE || DEBUG_DCC_DECODE_CV || \
-    DEBUG_DCC_DECODE_E_NOT_FOR_US
-                    printf("\r\n");
-#endif
-                }
-
-                
+                dcc_decode();
                 // Tell the ISR we've consumed the message and it can store another.
                 dcc_ready = 0;
+            } else {
+                // Is there anything to do during idle time?
+                dcc_idle();
             }
         }
-        
+
         // Control reaches here when TMR0 has gone off.
-#if DEBUG_STATUS
-        printf("%d is %c@%d/%d Fn=%d%d%d%d%d%d%d%d%d%d%d%d%d\r\n",
-                my_dcc_address, my_dcc_direction, my_dcc_speed, my_dcc_speedsteps,
-                my_dcc_functions[0], my_dcc_functions[1], my_dcc_functions[2],
-                my_dcc_functions[3], my_dcc_functions[4], my_dcc_functions[5],
-                my_dcc_functions[6], my_dcc_functions[7], my_dcc_functions[8],
-                my_dcc_functions[9], my_dcc_functions[10], my_dcc_functions[11],
-                my_dcc_functions[12]);
-#endif
         // Print DCC performance statistics and clear, if enabled.
         dcc_performance();
     }

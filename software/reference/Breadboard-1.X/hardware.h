@@ -31,7 +31,7 @@ extern "C" {
  * Function prototypes for our exposed functions.
  */
 void motor_pwm(void);
-void motor_control(uint8_t speedsteps, uint8_t speed, char direction);
+void motor_control(uint8_t speedsteps, uint8_t speed, uint8_t direction);
 void function_control(void);
 
 

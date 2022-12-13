@@ -35,8 +35,7 @@ static uint8_t motor_direction = 0;   // 0 = forward, 1 = reverse
 /*
  * motor_control is called when we get a DCC speed/direction message
  */
-void motor_control(uint8_t speedsteps, uint8_t speed, char direction) {
-
+void motor_control(uint8_t speedsteps, uint8_t speed, uint8_t direction) {    
     if (speedsteps == 128) {
         if (speed == 1) {
             // In 128SS mode, a speed of 1 is ESTOP.  Treat the same as stop.
@@ -59,22 +58,36 @@ void motor_control(uint8_t speedsteps, uint8_t speed, char direction) {
 
     // Toggling the mode[0] bit of CWG1CON1 changes direction of the full
     // bridge output.
-    if (direction == 'F') {
-        motor_direction = 0;
-        CWG1CON1 = CWG1CON1 & 0xFE;
-#if DEBUG_HW_MOTOR
-    printf("Setting PWM1 to speed %d/255 forward.\r\n", motor_speed);
-#endif
-
-    } else if (direction == 'R') {
-        motor_direction = 1;
-        CWG1CON1 = CWG1CON1 | 0x01;
-#if DEBUG_HW_MOTOR
-    printf("Setting PWM1 to speed %d/255 backwards.\r\n", motor_speed);
-#endif
+    // Are we in a consist?
+    if (my_dcc_consist) {
+        // Is our direction reversed?
+        if (my_dcc_consist_ndot) {
+            motor_direction = !direction;
+        // Normal direction
+        } else {
+            motor_direction = direction;
+        }
+    // Not in a consist.
+    } else {
+        if (my_dcc_ndot) {
+            motor_direction = !direction;
+        } else {
+            motor_direction = direction;
+        }
     }
-
+    if (motor_direction) {
+        CWG1CON1 = CWG1CON1 | 0x01;
+        
+    } else {
+        CWG1CON1 = CWG1CON1 & 0xFE;
+    }
+#if DEBUG_HW_MOTOR
+    printf("Motor PWM %d/255 direction %c.\r\n", motor_speed, motor_direction ? 'R' : 'F');
+#endif
 }
+
+    
+
 
 /*
  * function_control sets the output functions as requested from the DCC packet.
@@ -83,7 +96,8 @@ void motor_control(uint8_t speedsteps, uint8_t speed, char direction) {
  *
  */
 void function_control(void) {
-
+    return;
+    
     if (my_dcc_functions[0]) {
         if (my_dcc_direction == 'F') {
             IO_F0F_SetHigh();
