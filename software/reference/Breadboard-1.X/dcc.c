@@ -37,6 +37,7 @@ static volatile uint16_t   dcc_zeros             = 0;    // Number of DCC zeros 
 static volatile uint16_t   dcc_ones              = 0;    // Number of DCC ones received.
 static volatile uint16_t   dcc_overrun           = 0;    // Number of DCC messages too long for our buffer.
 #endif
+static uint8_t             cv_cv29;                      // Memory copy of CV29 so we don't have to read EEPROM.
 static uint8_t  dcc_speeds[] = {              // 28 Speed Step Table
     0,    // STOP
     0,    // ESTOP, since we don't do momentum yet can be the same.
@@ -206,24 +207,23 @@ reset:
     T2CONbits.TMR2ON = 1;
 }
 
-static uint8_t cv_cv29;
-
-// Called at startup to initialize our DCC information.
+/*
+ * dcc_initialize - Called at startup to initialize our DCC information.
+ */
 void dcc_initialize(void) {
-
     cv_cv29 = cv_read(CV_CONFIGURATION_DATA);
     
-    // Extended address
+    // Extended address?
     if (cv_cv29 & 0x20) {
         my_dcc_address = ((uint16_t)cv_read(CV_EXTENDED_ADDRESS_HIGH) << 8) | (uint16_t)cv_read(CV_EXTENDED_ADDRESS_LOW);
     } else {
         my_dcc_address = cv_read(CV_PRIMARY_ADDRESS);
     }
-    my_dcc_ndot = cv_cv29 & 0x01;
-    
+    my_dcc_ndot = cv_cv29 & 0x01;   
     my_dcc_consist = cv_read(CV_CONSIST_ADDRESS) & 0x7F;
     my_dcc_consist_ndot = (cv_read(CV_CONSIST_ADDRESS) & 0x80) >> 7;
 }
+
 /*
  * dcc_decode - Called when there is a DCC message from the ISR.
  *
@@ -462,6 +462,7 @@ void inline dcc_decode(void) {
                         // TTTT=0010 Set the consist address, normal direction.
                         if ((dcc_mesg[i] & 0x0F) == 0x02) {
                            cv_write(CV_CONSIST_ADDRESS, dcc_mesg[i+1]);
+                           my_dcc_consist_ndot = DCC_FORWARD;
 #if DEBUG_DCC_DECODE_DECODER
                            printf("Set consist dir=f address=%d", dcc_mesg[i+1]);
 #endif
@@ -469,6 +470,7 @@ void inline dcc_decode(void) {
                         // TTTT=0011 Set the consist address, reverse direction.
                         } else if ((dcc_mesg[i] & 0x0F) == 0x03) {
                             cv_write(CV_CONSIST_ADDRESS, dcc_mesg[i+1] & 0x80);
+                            my_dcc_consist_ndot = DCC_REVERSE;
 #if DEBUG_DCC_DECODE_DECODER
                             printf("Set consist dir=r address=%d", dcc_mesg[i+1]);
 #endif
@@ -511,12 +513,14 @@ void inline dcc_decode(void) {
                             // F=1 Long Address in CV17&CV18
                             if (dcc_mesg[i] & 0x01) {
                                 cv_write(CV_CONFIGURATION_DATA, cv_read(CV_CONFIGURATION_DATA) | 0x20);
+                                cv_cv29 = cv_read(CV_CONFIGURATION_DATA);
 #if DEBUG_DCC_DECODE_DECODER
                             printf("Set Advanced Addressing, use CV17/CV18 long address");
 #endif     
                             // F=0 Short Address in CV1
                             }else {
                                 cv_write(CV_CONFIGURATION_DATA, cv_read(CV_CONFIGURATION_DATA) & ~0x20);
+                                cv_cv29 = cv_read(CV_CONFIGURATION_DATA);
 #if DEBUG_DCC_DECODE_DECODER
                                 printf("Set Advanced Addressing, use CV1 short address");
 #endif     
@@ -642,6 +646,7 @@ void inline dcc_decode(void) {
                             cv_write(CV_EXTENDED_ADDRESS_HIGH, dcc_mesg[i + 2]);
                             // Toggle to extended addressing.
                             cv_write(CV_CONFIGURATION_DATA, cv_read(CV_CONFIGURATION_DATA) | 0x20);
+                            cv_cv29 = cv_read(CV_CONFIGURATION_DATA);
 #if DEBUG_DCC_DECODE_CV
                             printf("%d Write CV17/CV18/CV29 Short Form new address=%d", pkt_addr, ((uint16_t)dcc_mesg[i + 2] << 8) | (uint16_t)dcc_mesg[i + 1]);
 #endif
@@ -677,7 +682,7 @@ void inline dcc_decode(void) {
                         // GG=11 Write byte
                         } else if ((dcc_mesg[i] & 0x0C) == 0x0C) {
                             cv_write(cv_address, dcc_mesg[i+2]);
-                            // This may have changed our address, CV29, etc, reinitialize.
+                            // This may have changed our address, consist, CV29, etc, reinitialize.
                             dcc_initialize();
 #if DEBUG_DCC_DECODE_CV
                             printf("%d Write CV Long Form CV=%d, value=%02x", pkt_addr, cv_address, dcc_mesg[i+2]);
@@ -690,8 +695,7 @@ void inline dcc_decode(void) {
                             if (dcc_mesg[i+2] & 0xF0) {
                                 // Set bit
                                 if (cv_value) {
-                                    cv_write(cv_address, cv_read(cv_address) | (uint8_t)(cv_value << cv_bit));
-                                    
+                                    cv_write(cv_address, cv_read(cv_address) | (uint8_t)(cv_value << cv_bit));                                   
                                 // Clear bit
                                 } else {
                                     cv_write(cv_address, cv_read(cv_address) & ~(cv_value << cv_bit));
