@@ -56,28 +56,21 @@ void motor_control(uint8_t speedsteps, uint8_t speed, uint8_t direction) {
     PWM1_16BIT_SetSlice1Output2DutyCycleRegister(motor_speed);
     PWM1_16BIT_LoadBufferRegisters();
 
-    // Toggling the mode[0] bit of CWG1CON1 changes direction of the full
-    // bridge output.
+
     // Are we in a consist?
     if (my_dcc_consist) {
-        // Is our direction reversed?
-        if (my_dcc_consist_ndot) {
-            motor_direction = !direction;
-        // Normal direction
-        } else {
-            motor_direction = direction;
-        }
+        motor_direction = direction ^ (my_dcc_consist_ndot ^ my_dcc_ndot);
     // Not in a consist.
     } else {
-        if (my_dcc_ndot) {
-            motor_direction = !direction;
-        } else {
-            motor_direction = direction;
-        }
+        motor_direction = direction ^ my_dcc_ndot;
     }
+ 
+    // Toggling the mode[0] bit of CWG1CON1 changes direction of the full
+    // bridge output.
+    // Reverse
     if (motor_direction) {
         CWG1CON1 = CWG1CON1 | 0x01;
-        
+    // Forward
     } else {
         CWG1CON1 = CWG1CON1 & 0xFE;
     }
