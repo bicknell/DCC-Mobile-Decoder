@@ -31,14 +31,14 @@ extern "C" {
 /*
  * General Debugging 
  */
-#define DEBUG_STATUS                   1  // Output the current decoder status once a second.
-#define DEBUG_PERFORMANCE              1  // Collect statistics about performance and display once a second.
+#define DEBUG_STATUS                   0  // Output the current decoder status once a second.
+#define DEBUG_PERFORMANCE              0  // Collect statistics about performance and display once a second.
 
 /*
  * Debugging of CV operations
  */
 #define DEBUG_CV_RESET                 0  // Debug when we reset CV's.
-#define DEBUG_CV_RW                    1  // Debug CV read/write operations.
+#define DEBUG_CV_RW                    0  // Debug CV read/write operations.
     
 /*
  * Debugging of the DCC signal:
