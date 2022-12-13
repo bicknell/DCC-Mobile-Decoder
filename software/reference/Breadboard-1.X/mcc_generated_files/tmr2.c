@@ -74,8 +74,8 @@ void TMR2_Initialize(void)
     // T2RSEL T2INPPS pin; 
     T2RST = 0x00;
 
-    // PR2 119; 
-    T2PR = 0x77;
+    // PR2 159; 
+    T2PR = 0x9F;
 
     // TMR2 0; 
     T2TMR = 0x00;

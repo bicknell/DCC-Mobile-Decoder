@@ -14440,7 +14440,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR2" name="TimerPeriodkey"/>
-         <value>16666.666666666668</value>
+         <value>12500.000000000002</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR2" name="clockFreq"/>
@@ -14476,7 +14476,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR2" name="periodValue"/>
-         <value>119</value>
+         <value>159</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR2" name="pinEnable"/>
@@ -14488,11 +14488,11 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR2" name="timerPeriod"/>
-         <value>0.00006</value>
+         <value>0.00008</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR2" name="timerPeriodActual"/>
-         <value>0.00006</value>
+         <value>0.00008</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR2" name="timerPeriodMax"/>
@@ -14884,7 +14884,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="TMR2" registerAlias="TPR"/>
-         <value>119</value>
+         <value>159</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="TMR2" registerAlias="TRST"/>
@@ -14944,7 +14944,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="TMR2" registerAlias="TPR" settingAlias="PR"/>
-         <value>119</value>
+         <value>159</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="TMR2" registerAlias="TRST" settingAlias="TRSEL"/>
@@ -16038,7 +16038,7 @@
       </entry>
       <entry>
          <file>mcc_generated_files/tmr2.c</file>
-         <hash>e71253e109d04ca0790a573dc4fc4bbadabd9ee33e197bf7fe02f3e429d4edc8</hash>
+         <hash>7d3176b5ac79ee68cb6929de193d56978cb607b7903e48b3acdbe74126e5f2d7</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/tmr0.h</file>

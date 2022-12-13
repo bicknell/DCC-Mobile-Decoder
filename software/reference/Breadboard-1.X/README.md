@@ -131,15 +131,20 @@ Configured as a once a second timer for statistics.
 
 ### TMR2
 
-Triggers when the DCC port goes high, fires 60us later so we can try and read
+Triggers when the DCC port goes high, fires 80us later so we can try and read
 a DCC bit.
+
+NMRA [S-9.1](https://www.nmra.org/sites/default/files/standards/sandrp/pdf/s-9.1_electrical_standards_for_digital_command_control_2021.pdf)
+says a one should not last more than 64us, with a nominal value of 58us.
+A zero should be a minimum of 100us.  Using 80us means the sample is taken
+midway between the two, maximizing compatability.
 
 - Check "Enable Timer"
 - Control Mode "One shot"
 - External reset source "T2INPPS pin"
 - Clock source "HFINTOSC"
 - Prescaler "1:32"
-- Timer period "60us"
+- Timer period "80us"
 - Check "Enable Timer Interrupt"
 
 ### UART1 

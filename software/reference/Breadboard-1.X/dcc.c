@@ -27,10 +27,7 @@
 #include "hardware.h"
 
 /*
- * Global variabels for the DCC subsystem.
- *
- * Note that we decode 12 functions due to how they are sent in the packets
- * regardless of how many functions this particular decoder impelments.
+ * Global variables for the DCC subsystem.
  */
 #if DEBUG_PERFORMANCE
 static volatile uint32_t   idle_count            = 0;    // Idle cycle counter.
@@ -80,11 +77,11 @@ static uint8_t  dcc_speeds[] = {              // 28 Speed Step Table
  * DCC_ISR - The interrupt service routine to read DCC bits off the wire.
  * 
  * Assumptions:
- *     - TMR2 is configured to go off ~65us after the pin has gone high
+ *     - TMR2 is configured to go off ~80us after the pin has gone high
  *       and call this ISR.
  * 
  * When the DCC input goes high, TMR2 is configured to start and run for
- * approximately 65us.  When it goes off it generates an interrupt and
+ * approximately 80us.  When it goes off it generates an interrupt and
  * calls this ISR.  The ISR then reads the DCC pin.  If it is still high
  * then it is a DCC zero.  If the pin is now low, it is a DCC one.  This 
  * bit-stream is collected into dcc_bits[] to form the bytes of the message.
@@ -153,8 +150,8 @@ void DCC_ISR(void) {
                     dcc_mesg[3] = dcc_bits[3];
                     dcc_mesg[4] = dcc_bits[4];
                     dcc_mesg[5] = dcc_bits[5];
-                    dcc_len = dcc_byte;
-                    dcc_ready = 1; // Tell main() to consume the message.
+                    dcc_len     = dcc_byte;
+                    dcc_ready   = 1; // Tell main() to consume the message.
                 } else {
                     // Last message hasn't been consumed yet, so this one gets thrown away.
 #if DEBUG_PERFORMANCE
@@ -222,9 +219,13 @@ void dcc_initialize(void) {
     } else {
         my_dcc_address = cv_read(CV_PRIMARY_ADDRESS);
     }
+    my_dcc_ndot = cv_cv29 & 0x01;
+    
+    my_dcc_consist = cv_read(CV_CONSIST_ADDRESS) & 0x7F;
+    my_dcc_consist_ndot = (cv_read(CV_CONSIST_ADDRESS) & 0x80) >> 7;
 }
 /*
- * dcc_dispatch is called when there is a valid DCC message to take the appropriate action.
+ * dcc_decode - Called when there is a DCC message from the ISR.
  *
  * Global Variable Inputs:
  *     dcc_mesg[]
@@ -236,56 +237,77 @@ void dcc_initialize(void) {
  *     my_dcc_speed
  *     my_dcc_direction
  *
+ * The following variables would ordinarily be declared inside the function on
+ * most platforms.  Due to the way the micro-processor works it is far more
+ * efficient to make these "global" variables.  These variables should not
+ * be used outside of this function.
  */
-void dcc_decode(void) {
-    uint16_t pkt_addr;
-    
-    // The length includes the checksum byte, which has been verified before
-    // getting here.  We don't want to try and parse it.
-    --dcc_len;
+static uint16_t pkt_addr;     // DCC address in the packet.
+static uint8_t  xor = 0;      // Stores the xor value.
+static uint8_t  i;            // Loop index counter.
+static uint8_t  address_bits; // How many address bits in the message.
+static uint8_t  i_start;      // Index where instructions start.
+static uint16_t cv_address;   // Configuration variable address.
+static uint8_t  cv_value;     // Configuration variable value.
+static uint8_t  cv_bit;       // Configuration variable bit position.
 
-    // If a CS sent a single byte on the wire (which is not allowed per spec)
-    // it should fail the checksum, which means we should never get here.
-    // This check should not be necessary as a result.
-    if (dcc_len == 1) {
-#if DEBUG_DCC_NOT_FOR_US
-        printf("Invalid short packet.");
+void inline dcc_decode(void) {
+    
+    // Compute checksum.
+    xor = 0;
+    for (i = 0; i < dcc_len; ++i) {
+        xor ^= dcc_mesg[i];
+    }
+#if DEBUG_DCC_PACKET
+    // Do not print newline if passing, so decode is on the same line.
+    printf("Rec %02x %02x %02x %02x %02x %02x (%d) %s",
+            dcc_mesg[0], dcc_mesg[1], dcc_mesg[2],
+            dcc_mesg[3], dcc_mesg[4], dcc_mesg[5],
+            dcc_len, xor ? "FAIL\r\n" : "PASS: ");
 #endif
+    // If checksum failed nothing to parse.
+    if (xor) {
         return;
     }
 
-    // Special case, Baseline Idle packet
-    if ((dcc_len == 2) && (dcc_mesg[0] == 0xFF) && (dcc_mesg[1] == 0x00)) {
-#if DEBUG_DCC_NOT_FOR_US
-        printf("Baseline: Not us, Idle Packet.");
-#endif
-    // Special case, Broadcast Decoder Reset packet. 
-    } else if ((dcc_len == 2) && (dcc_mesg[0] == 0x00) && (dcc_mesg[1] == 0x00)) {
+    // Broadcast packets are all address 0.
+    if (dcc_mesg[0] == 0x00) {
+        // Special case, Broadcast Decoder Reset packet. 
+        if ((dcc_mesg[1] == 0x00) && (dcc_len == 3)) {
 #if DEBUG_DCC_DECODE_BASELINE    
-        printf("Baseline: Broadcast decoder reset!", my_dcc_address, my_dcc_direction, my_dcc_speed);
+        printf("Baseline: Broadcast decoder reset!\r\n", my_dcc_address, my_dcc_direction, my_dcc_speed);
 #endif
         my_dcc_speed = 0;
         my_dcc_speedsteps = 128;
-        my_dcc_direction = 'F';
+        my_dcc_direction = DCC_FORWARD;
         motor_control(my_dcc_speedsteps, my_dcc_speed, my_dcc_direction);
-    // Special case, Broadcast Stop Packet
-    } else if ((dcc_len == 2) && (dcc_mesg[0] == 0x00) && ((dcc_mesg[1] & 0xC1) == 0xC1)) {
-        my_dcc_speed = 0;
-        motor_control(my_dcc_speedsteps, my_dcc_speed, my_dcc_direction);
+        // Special case, Broadcast Stop Packet
+        } else if (((dcc_mesg[1] & 0xC1) == 0xC1) && (dcc_len == 3)) {
+            my_dcc_speed = 0;
+            motor_control(my_dcc_speedsteps, my_dcc_speed, my_dcc_direction);
 #if DEBUG_DCC_DECODE_BASELINE    
-        printf("Baseline: Broadcast Stop.", my_dcc_address, my_dcc_direction, my_dcc_speed);
+            printf("Baseline: Broadcast Stop.\r\n", my_dcc_address, my_dcc_direction, my_dcc_speed);
 #endif
+        }
+        return;
+    }
+    // Special case, Baseline Idle packet
+    if ((dcc_mesg[0] == 0xFF) && (dcc_mesg[1] == 0x00) && (dcc_len == 3)) {
+#if DEBUG_DCC_DECODE_NOT_FOR_US
+        printf("Baseline: Not us, Idle Packet.\r\n");
+#endif
+        return;
     // Baseline speed/direction packet
     // Note there are 2-byte extended packets, critical to check the high bit of
     // byte 0 is 0, and the top two bits of byte 1 is 01 to validate it is a baseline
     // packet.
-    } else if ((dcc_len == 2) && ((dcc_mesg[0] & 0x80) == 0x00) && ((dcc_mesg[1] & 0xC0) == 0x40)) {
+    } else if (((dcc_mesg[0] & 0x80) == 0x00) && ((dcc_mesg[1] & 0xC0) == 0x40) && (dcc_len == 3)) {
         // Decode the pkt_addr
         pkt_addr = dcc_mesg[0] & 0x7F;
 
         // Do we have a 7 bit pkt_addr configured that matches?
-        if (my_dcc_address == pkt_addr) {
-            my_dcc_direction = dcc_mesg[1] & 0x20 ? 'F' : 'B';
+        if ((my_dcc_consist == pkt_addr) || (my_dcc_address == pkt_addr)) {
+            my_dcc_direction = dcc_mesg[1] & 0x20 ? DCC_FORWARD : 'B';
             // 28/128 speed step mode enabled
             if (cv_cv29 & 02) {
                 my_dcc_speedsteps = 28;
@@ -296,21 +318,18 @@ void dcc_decode(void) {
                 my_dcc_speed = dcc_speeds[dcc_mesg[1] & 0x0F];
                 my_dcc_functions[0] = (dcc_mesg[1] & 0x10) >> 4;
             }
-
             motor_control(my_dcc_speedsteps, my_dcc_speed, my_dcc_direction);
 #if DEBUG_DCC_DECODE_BASELINE
-            printf("Baseline: B/%d %d is %c@%d", my_dcc_speedsteps, my_dcc_address, my_dcc_direction, my_dcc_speed);
+            printf("Baseline: B/%d %d is %c@%d\r\n", my_dcc_speedsteps, my_dcc_address, my_dcc_direction, my_dcc_speed);
 #endif
         } else {
-#if DEBUG_DCC_NOT_FOR_US
-            printf("Baseline: Not us, for %d", pkt_addr);
+#if DEBUG_DCC_DECODE_NOT_FOR_US
+            printf("Baseline: Not us, for %d\r\n", pkt_addr);
 #endif
         }
+        return;
     // Must be an S-9.2.1 Extended Packet
     } else {
-        uint8_t address_bits; // How many address bits.
-        uint8_t i_start;      // Index where instructions start.
-
         // Multi-Function Decoders with 14 bit addresses.
         if ((dcc_mesg[0] & 0xC0) == 0xC0) {  
             pkt_addr = (uint16_t) dcc_mesg[1] | (((uint16_t) dcc_mesg[0] & 0x3F) << 8);
@@ -337,20 +356,104 @@ void dcc_decode(void) {
         }
 
         // Does the address match our address or the broadcast address?
-        if ((my_dcc_address == pkt_addr) || (pkt_addr == 0x00)) {
+        if ((my_dcc_consist == pkt_addr) || (my_dcc_address == pkt_addr) || (pkt_addr == 0x00)) {
 #if DEBUG_DCC_DECODE_EXTENDED    
             printf("Extended: ");
 #endif 
             // Loop through the instructions starting at i_start.
-            for (uint8_t i = i_start;i < dcc_len;++i) {
+            // Do not process the checksum byte at the end.
+            for (uint8_t i = i_start;i < (dcc_len - 1);++i) {
 #if DEBUG_DCC_DECODE_EXTENDED
                 // Second (third, fourth), instruction in the packet.
                 if (i != i_start) {
                     printf("; (i=%d)", i);
                 }
 #endif
+                // The most common packet is a speed/direction packet, so we
+                // place it first as an optimization.
+                // S-9.2.1 2.3.2 CCC=001 Advanced Operations Instructions 2-BYTE
+                if ((dcc_mesg[i] & 0xE0) == 0x20) {
+                    // S-9.2.1 2.3.2.1 GGGGG==11111 128 speed step
+                    if ((dcc_mesg[i] & 0x1F) == 0x1F) {
+                        my_dcc_direction = dcc_mesg[i+1] & 0x80 ? DCC_FORWARD : DCC_REVERSE;
+                        my_dcc_speedsteps = 128;
+                        // 0 == STOP, 1 == ESTOP in 128ss mode, otherwise speed
+                        my_dcc_speed = (uint8_t)dcc_mesg[i+1] & 0x7F;
+                        motor_control(my_dcc_speedsteps, my_dcc_speed, my_dcc_direction);
+#if DEBUG_DCC_DECODE_SPEED
+                        // This really should be DEBUG_DCC_DECODE_ADV_OPS, but practically,
+                        // it makes more sense to group with DEBUG_DCC_DECODE_SPEED.
+                        printf("E128/%d(%d) %d is %c@%d", address_bits, i, my_dcc_address,
+                                my_dcc_direction, my_dcc_speed);
+#endif
+                        ++i; // Increment again, as it was a 2-BYTE instruction
+                    // S-9.2.1 2.3.2.2 GGGGG=11101 Zimo East-West Direction Proposal
+                    } else if ((dcc_mesg[i] & 0x1F) == 0x1E) {
+#if DEBUG_DCC_DECODE_ADV_OPS
+                        printf("Reserved for Zimo East-West CCC=001 Advanced Operation");
+#endif                
+// TODO: How do we know if 2 or 3 byte for the reserved?
+                        ++i; // Increment again, as it was a 2-BYTE instruction
+                    // S-9.2.1 2.3.2.3 GGGGG=11101 Analog Function group
+                    } else if ((dcc_mesg[i] & 0x1F) == 0x1D) {
+#if DEBUG_DCC_DECODE_ADV_OPS
+                        printf("Advanced Operations Analog (%02x, %02x)", dcc_mesg[i+1], dcc_mesg[i+2]);
+#endif
+                        // Digitrax uses this for F2 variable volume.
+                        i+=2; // Increment again, as it was a 3-BYTE instruction
+                    // S-9.2.1 2.3.2.4 Reserved for future use.
+                    } else {
+#if DEBUG_DCC_DECODE_ADV_OPS
+                        printf("Reserved for future use CCC=001 Advanced Operation");
+#endif                
+// TODO: How do we know if 2 or 3 byte for the reserved?
+                        ++i; // Increment again, as it was a 2-BYTE instruction
+                    }
+                // Second most common packet is a FG1 packet, so we place it second
+                // as an optimization.
+                // S-9.2.1 2.3.4 CCC=100 Function Group One Instruction
+                } else if ((dcc_mesg[i] & 0xE0) == 0x80) {
+                    my_dcc_functions[0]  = (dcc_mesg[i] & 0x10) >> 4;
+                    my_dcc_functions[1]  = (dcc_mesg[i] & 0x01);
+                    my_dcc_functions[2]  = (dcc_mesg[i] & 0x02) >> 1;
+                    my_dcc_functions[3]  = (dcc_mesg[i] & 0x04) >> 2;
+                    my_dcc_functions[4]  = (dcc_mesg[i] & 0x08) >> 3;
+                    function_control();
+#if DEBUG_DCC_DECODE_E_FN
+                    printf("EFG1/%d(%d) %d is %d%d%d%d%d (0-4)", address_bits, i, my_dcc_address, 
+                            my_dcc_functions[0], my_dcc_functions[1], my_dcc_functions[2], 
+                            my_dcc_functions[3], my_dcc_functions[4]);
+#endif
+                // Third most common packet is a FG2 packet, so we place it third
+                // as an optimization.
+                // S-9.2.1 2.3.5 CCC=101 Function Group Two Instruction
+                } else if ((dcc_mesg[i] & 0xE0) == 0xA0) {
+                    if ((dcc_mesg[i] & 0x10) == 0x10) {
+                        my_dcc_functions[5]  = (dcc_mesg[i] & 0x01);
+                        my_dcc_functions[6]  = (dcc_mesg[i] & 0x02) >> 1;
+                        my_dcc_functions[7]  = (dcc_mesg[i] & 0x04) >> 2;
+                        my_dcc_functions[8]  = (dcc_mesg[i] & 0x08) >> 3;
+                        function_control();
+#if DEBUG_DCC_DECODE_E_FN
+                        printf("EFG2/%d(%d) %d is %d%d%d%d (5-8)", address_bits, i, my_dcc_address, 
+                                my_dcc_functions[5], my_dcc_functions[6],
+                                my_dcc_functions[7], my_dcc_functions[8]);
+#endif
+                    } else {
+                        my_dcc_functions[9]  = (dcc_mesg[i] & 0x01);
+                        my_dcc_functions[10] = (dcc_mesg[i] & 0x02) >> 1;
+                        my_dcc_functions[11] = (dcc_mesg[i] & 0x04) >> 2;
+                        my_dcc_functions[12] = (dcc_mesg[i] & 0x08) >> 3;
+                        function_control();
+#if DEBUG_DCC_DECODE_E_FN
+                        printf("EFG2/%d(%d) %d is %d%d%d%d (9-12)", address_bits, i, my_dcc_address,
+                                my_dcc_functions[9], my_dcc_functions[10], 
+                                my_dcc_functions[11], my_dcc_functions[12]);
+#endif
+                    }
+              
                 // S-9.2.1 2.3.1 CCC=000 Decoder and Consist Control Instruction
-                if ((dcc_mesg[i] & 0xE0) == 0x00) {
+                } else if ((dcc_mesg[i] & 0xE0) == 0x00) {
 #if DEBUG_DCC_DECODE_DECODER
                                 printf("Decoder control");
 #endif
@@ -358,12 +461,21 @@ void dcc_decode(void) {
                     if (dcc_mesg[i] & 0x10) {
                         // TTTT=0010 Set the consist address, normal direction.
                         if ((dcc_mesg[i] & 0x0F) == 0x02) {
+                           cv_write(CV_CONSIST_ADDRESS, dcc_mesg[i+1]);
+#if DEBUG_DCC_DECODE_DECODER
+                           printf("Set consist dir=f address=%d", dcc_mesg[i+1]);
+#endif
 //TODO Address is in dcc_mesg[i+1], 0x00 deactivates
                         // TTTT=0011 Set the consist address, reverse direction.
                         } else if ((dcc_mesg[i] & 0x0F) == 0x03) {
+                            cv_write(CV_CONSIST_ADDRESS, dcc_mesg[i+1] & 0x80);
+#if DEBUG_DCC_DECODE_DECODER
+                            printf("Set consist dir=r address=%d", dcc_mesg[i+1]);
+#endif
+
 //TODO Address is in dcc_mesg[i+1], 0x00 deactivates
                         }
-                        
+                        my_dcc_consist = (uint16_t)dcc_mesg[i+1];
                     // S-9.2.1 2.3.1.1 CCCG=0000 Decoder Control
                     } else {
                         // TTT=000 Digital Decoder Reset
@@ -394,7 +506,6 @@ void dcc_decode(void) {
 #if DEBUG_DCC_DECODE_DECODER
                             printf("Factory test requested");
 #endif     
-
                         // S-9.2.1 2.3.1.2 TTT=101 Set Advanced Addressing
                         } else if ((dcc_mesg[i] & 0xE) == 0x06) {
                             // F=1 Long Address in CV17&CV18
@@ -414,53 +525,13 @@ void dcc_decode(void) {
                         // S-9.2.1 2.3.1.2 TTT=111 Decoder Acknowledgement Request
                         } else if ((dcc_mesg[i] & 0xE) == 0x0E) {
 //TODO
-                        }
-                        
+                        }       
                     }
                     ++i; // Increment again, as it was a 2-BYTE instruction
-                // S-9.2.1 2.3.2 CCC=001 Advanced Operations Instructions 2-BYTE
-                } else if ((dcc_mesg[i] & 0xE0) == 0x20) {
-                    // S-9.2.1 2.3.2.1 GGGGG==11111 128 speed step
-                    if ((dcc_mesg[i] & 0x1F) == 0x1F) {
-                        my_dcc_direction = dcc_mesg[i+1] & 0x80 ? 'F' : 'R';
-                        my_dcc_speedsteps = 128;
-                        // 0 == STOP, 1 == ESTOP in 128ss mode, otherwise speed
-                        my_dcc_speed = (uint8_t)dcc_mesg[i+1] & 0x7F;
-                        motor_control(my_dcc_speedsteps, my_dcc_speed, my_dcc_direction);
-#if DEBUG_DCC_DECODE_SPEED
-                        // This really should be DEBUG_DCC_DECODE_ADV_OPS, but practically,
-                        // it makes more sense to group with DEBUG_DCC_DECODE_SPEED.
-                        printf("E128/%d(%d) %d is %c@%d", address_bits, i, my_dcc_address,
-                                my_dcc_direction, my_dcc_speed);
-#endif
-                        ++i; // Increment again, as it was a 2-BYTE instruction
-                   // S-9.2.1 2.3.2.2 GGGGG=11101 Zimo East-West Direction Proposal
-                    } else if ((dcc_mesg[i] & 0x1F) == 0x1E) {
-#if DEBUG_DCC_DECODE_ADV_OPS
-                        printf("Reserved for Zimo East-West CCC=001 Advanced Operation");
-#endif                
-// TODO: How do we know if 2 or 3 byte for the reserved?
-                        ++i; // Increment again, as it was a 2-BYTE instruction
-                    // S-9.2.1 2.3.2.3 GGGGG=11101 Analog Function group
-                    } else if ((dcc_mesg[i] & 0x1F) == 0x1D) {
-#if DEBUG_DCC_DECODE_ADV_OPS
-                        printf("Advanced Operations Analog (%02x, %02x)", dcc_mesg[i+1], dcc_mesg[i+2]);
-#endif
-                        // Digitrax uses this for F2 variable volume.
-                        i+=2; // Increment again, as it was a 3-BYTE instruction
-                    // S-9.2.1 2.3.2.4 Reserved for future use.
-                    } else {
-#if DEBUG_DCC_DECODE_ADV_OPS
-                        printf("Reserved for future use CCC=001 Advanced Operation");
-#endif                
-// TODO: How do we know if 2 or 3 byte for the reserved?
-                        ++i; // Increment again, as it was a 2-BYTE instruction
-                    }
-                    
                 // S-9.2.1 2.3.3 CCC=010 Speed and Direction Instructions
                 } else if ((dcc_mesg[i] & 0xE0) == 0x40) {
                     // 28 speed step reverse
-                    my_dcc_direction = 'R';
+                    my_dcc_direction = DCC_REVERSE;
                     my_dcc_speedsteps = 28;
                     my_dcc_speed = dcc_speeds[dcc_mesg[i] & 0x1F];
                     motor_control(my_dcc_speedsteps, my_dcc_speed, my_dcc_direction);
@@ -470,51 +541,13 @@ void dcc_decode(void) {
                 // S-9.2.1 2.3.3 CCC=011 Speed and Direction Instructions
                 } else if ((dcc_mesg[i] & 0xE0) == 0x60) {
                     // 28 speed step forward
-                    my_dcc_direction = 'F';
+                    my_dcc_direction = DCC_FORWARD;
                     my_dcc_speedsteps = 28;
                     my_dcc_speed = dcc_speeds[dcc_mesg[i] & 0x1F];
                     motor_control(my_dcc_speedsteps, my_dcc_speed, my_dcc_direction);
 #if DEBUG_DCC_DECODE_SPEED
                     printf("E28%d(%d) %d is %c@%s", address_bits, i, my_dcc_address, my_dcc_direction, my_dcc_speed);
 #endif
-                // S-9.2.1 2.3.4 CCC=100 Function Group One Instruction
-                } else if ((dcc_mesg[i] & 0xE0) == 0x80) {
-                    my_dcc_functions[0]  = (dcc_mesg[i] & 0x10) >> 4;
-                    my_dcc_functions[1]  = (dcc_mesg[i] & 0x01);
-                    my_dcc_functions[2]  = (dcc_mesg[i] & 0x02) >> 1;
-                    my_dcc_functions[3]  = (dcc_mesg[i] & 0x04) >> 2;
-                    my_dcc_functions[4]  = (dcc_mesg[i] & 0x08) >> 3;
-                    function_control();
-#if DEBUG_DCC_DECODE_E_FN
-                    printf("EFG1/%d(%d) %d is %d%d%d%d%d (0-4)", address_bits, i, my_dcc_address, 
-                            my_dcc_functions[0], my_dcc_functions[1], my_dcc_functions[2], 
-                            my_dcc_functions[3], my_dcc_functions[4]);
-#endif
-                // S-9.2.1 2.3.5 CCC=101 Function Group Two Instruction
-                } else if ((dcc_mesg[i] & 0xE0) == 0xA0) {
-                    if ((dcc_mesg[i] & 0x10) == 0x10) {
-                        my_dcc_functions[5]  = (dcc_mesg[i] & 0x01);
-                        my_dcc_functions[6]  = (dcc_mesg[i] & 0x02) >> 1;
-                        my_dcc_functions[7]  = (dcc_mesg[i] & 0x04) >> 2;
-                        my_dcc_functions[8]  = (dcc_mesg[i] & 0x08) >> 3;
-                        function_control();
-#if DEBUG_DCC_DECODE_E_FN
-                        printf("EFG2/%d(%d) %d is %d%d%d%d (5-8)", address_bits, i, my_dcc_address, 
-                                my_dcc_functions[5], my_dcc_functions[6],
-                                my_dcc_functions[7], my_dcc_functions[8]);
-#endif
-                    } else {
-                        my_dcc_functions[9]  = (dcc_mesg[i] & 0x01);
-                        my_dcc_functions[10] = (dcc_mesg[i] & 0x02) >> 1;
-                        my_dcc_functions[11] = (dcc_mesg[i] & 0x04) >> 2;
-                        my_dcc_functions[12] = (dcc_mesg[i] & 0x08) >> 3;
-                        function_control();
-#if DEBUG_DCC_DECODE_E_FN
-                        printf("EFG2/%d(%d) %d is %d%d%d%d (9-12)", address_bits, i, my_dcc_address,
-                                my_dcc_functions[9], my_dcc_functions[10], 
-                                my_dcc_functions[11], my_dcc_functions[12]);
-#endif
-                    }
                 // S-9.2.1 2.3.6 CCC=110 Feature Expansion Instruction See TN-3-05
                 } else if ((dcc_mesg[i] & 0xE0) == 0xC0) {
 #if DEBUG_DCC_DECODE_FEATURE
@@ -522,47 +555,69 @@ void dcc_decode(void) {
 #endif
                     // S-9.2.1 2.3.6.1 GGGGG=00000 Binary State Control Instruction Long Form 3-BYTE instruction
                     if ((dcc_mesg[i] & 0x1F) == 0x00) {
-//TODO
+#if DEBUG_DCC_DECODE_FEATURE
+                        printf("Binary State Control Instruction Long Form, ignored");
+#endif
                         i+=2; // Increment again, as it was a 3-BYTE instruction
                     // S-9.2.1 2.3.6.2 GGGGG=00001 Time and Date Command
                     } else if ((dcc_mesg[i] & 0x1F) == 0x01) {
-//TODO
+#if DEBUG_DCC_DECODE_FEATURE
+                        printf("Time and Date Command, ignored");
+#endif
                         i+=3; // Increment again, as it was a 4-BYTE instruction
                     // S-9.2.1 2.3.6.3 GGGGG=00010 System time
                     } else if ((dcc_mesg[i] & 0x1F) == 0x02) {
-//TODO
+#if DEBUG_DCC_DECODE_FEATURE
+                        printf("System time, ignored");
+#endif
                         i+=2; // Increment again, as it was a 3-BYTE instruction
                     // S-9.2.1 2.3.6.4 GGGGG=11101 Binary State Control Instruction Short Form
                     } else if ((dcc_mesg[i] & 0x1F) == 0x1D) {
-//TODO
+#if DEBUG_DCC_DECODE_FEATURE
+                        printf("Binary State Control Instruction Short Form, ignored");
+#endif
                         ++i; // Increment again, as it was a 2-BYTE instruction
                     // S-9.2.1 2.3.6.5 GGGGG=11110 F13-F20 Function Control
                     } else if ((dcc_mesg[i] & 0x1F) == 0x1E) {
-//TODO
+#if DEBUG_DCC_DECODE_FEATURE
+                        printf("F13-F20, ignored");
+#endif
                         ++i; // Increment again, as it was a 2-BYTE instruction
                     // S-9.2.1 2.3.6.6 GGGGG=11111 F21-F28 Function Control
                     } else if ((dcc_mesg[i] & 0x1F) == 0x1F) {
-//TODO
+#if DEBUG_DCC_DECODE_FEATURE
+                        printf("F21-F28, ignored");
+#endif
                         ++i; // Increment again, as it was a 2-BYTE instruction
                     // S-9.2.1 2.3.6.7 GGGGG=11000 F29-F36 Function Control
                     } else if ((dcc_mesg[i] & 0x1F) == 0x18) {
-//TODO
+#if DEBUG_DCC_DECODE_FEATURE
+                        printf("F29-F36, ignored");
+#endif
                         ++i; // Increment again, as it was a 2-BYTE instruction
                     // S-9.2.1 2.3.6.8 GGGGG=11001 F37-F44 Function Control
                     } else if ((dcc_mesg[i] & 0x1F) == 0x19) {
-//TODO
+#if DEBUG_DCC_DECODE_FEATURE
+                        printf("F37-F44, ignored");
+#endif
                         ++i; // Increment again, as it was a 2-BYTE instruction
                     // S-9.2.1 2.3.6.9 GGGGG=11010 F45-F52 Function Control
                     } else if ((dcc_mesg[i] & 0x1F) == 0x1C) {
-//TODO
+#if DEBUG_DCC_DECODE_FEATURE
+                        printf("F45-F52, ignored");
+#endif
                         ++i; // Increment again, as it was a 2-BYTE instruction
                     // S-9.2.1 2.3.6.10 GGGGG=11011 F53-F60 Function Control
                     } else if ((dcc_mesg[i] & 0x1F) == 0x1B) {
-//TODO
+#if DEBUG_DCC_DECODE_FEATURE
+                        printf("F53-F60, ignored");
+#endif
                         ++i; // Increment again, as it was a 2-BYTE instruction
                     // S-9.2.1 2.3.6.11 GGGGG=11100 G61-F68 Function Control
                     } else if ((dcc_mesg[i] & 0x1F) == 0x18) {
-//TODO
+#if DEBUG_DCC_DECODE_FEATURE
+                        printf("G61-F68, ignored");
+#endif
                         ++i; // Increment again, as it was a 2-BYTE instruction
                     }
                 // S-9.2.1 2.3.7 CCC=111 Configuration Variable Access Instruction 3-BYTE instruction
@@ -610,7 +665,7 @@ void dcc_decode(void) {
                             }
                     // S-9.2.1 2.3.7.3 Configuration Variable Access Instruction - Long Form
                     } else {
-                        uint16_t cv_address = ((uint16_t)(dcc_mesg[i] & 0x03) << 8) | (uint16_t)dcc_mesg[i+1];
+                        cv_address = ((uint16_t)(dcc_mesg[i] & 0x03) << 8) | (uint16_t)dcc_mesg[i+1];
                         ++cv_address; // "The Configuration variable being addressed is the provided 10-bit address plus 1"
                         // GG=01 Verify byte
                         if ((dcc_mesg[i] & 0x0C) == 0x04) {
@@ -629,28 +684,28 @@ void dcc_decode(void) {
 #endif
                         // GG=10 Bit Manupulation
                         } else if ((dcc_mesg[i] & 0x0C) == 0x08) {
-                            uint8_t value = (dcc_mesg[i+2] & 0x08) >> 3;
-                            uint8_t bit   = dcc_mesg[i+2] & 0x07;
+                            cv_value = (dcc_mesg[i+2] & 0x08) >> 3;
+                            cv_bit   = dcc_mesg[i+2] & 0x07;
                             // Write bit
                             if (dcc_mesg[i+2] & 0xF0) {
                                 // Set bit
-                                if (value) {
-                                    cv_write(cv_address, cv_read(cv_address) | (uint8_t)(value << bit));
+                                if (cv_value) {
+                                    cv_write(cv_address, cv_read(cv_address) | (uint8_t)(cv_value << cv_bit));
                                     
                                 // Clear bit
                                 } else {
-                                    cv_write(cv_address, cv_read(cv_address) & ~(value << bit));
+                                    cv_write(cv_address, cv_read(cv_address) & ~(cv_value << cv_bit));
                                 }
                                 // This may have changed our address, CV29, etc, reinitialize.
                                 dcc_initialize();
 #if DEBUG_DCC_DECODE_CV
-                                printf("Write CV Long Form CV=%ld, bit=%d, value=%d", bit, value);
+                                printf("Write CV Long Form CV=%ld, bit=%d, value=%d", cv_bit, cv_value);
 #endif
                             // Verify bit
                             } else {
 #if DEBUG_DCC_DECODE_CV
                                 printf("Verify CV Long Form CV=%ld, bit=%d, value=%d, is=%d", 
-                                        bit, value, cv_read(cv_address) | (value << bit));
+                                        cv_bit, cv_value, cv_read(cv_address) | (cv_value << cv_bit));
 #endif
 //TODO read it back to the command station!
                             }
@@ -660,17 +715,27 @@ void dcc_decode(void) {
                 }
             }
         } else {
-#if DEBUG_DCC_NOT_FOR_US
+#if DEBUG_DCC_DECODE_NOT_FOR_US
             printf("Extended: Not for us, for %d", pkt_addr);
 #endif
         }
+#if DEBUG_DCC_DECODE_EXTENDED || DEBUG_DCC_DECODE_DECODER || DEBUG_DCC_DECODE_ADV_OPS || \
+    DEBUG_DCC_DECODE_SPEED    || DEBUG_DCC_DECODE_E_FN    || DEBUG_DCC_DECODE_FEATURE || \
+    DEBUG_DCC_DECODE_CV
+        printf("\r\n");
+#endif
     }
 }
 
 /*
  * dcc_performance - Print DCC performance measurements.
+ * 
+ * This is called once a second (TMR0) by the main loop to print
+ * performance and status information.
  */
-void dcc_performance(void) {
+void inline dcc_performance(void) {
+    uint16_t address;
+    
 #if DEBUG_PERFORMANCE
     // Print how many times the counter was incremented to give us an idea of idle time.
     printf("Perf: %lu/%u/%u (%u, %u)\r\n", idle_count, dcc_interrupts, dcc_drops,
@@ -681,13 +746,28 @@ void dcc_performance(void) {
     dcc_zeros = 0;
     dcc_ones = 0;
 #endif
+#if DEBUG_STATUS
+    if (my_dcc_consist) {
+        address = my_dcc_consist;
+    } else {
+        address = my_dcc_address;
+    }
+    printf("%d:%d(%d:%d) is %c@%d/%d Fn=%d%d%d%d%d%d%d%d%d%d%d%d%d\r\n",
+            my_dcc_address, my_dcc_ndot, my_dcc_consist, my_dcc_consist_ndot,
+            my_dcc_direction ? 'R' : 'F', my_dcc_speed, my_dcc_speedsteps,
+            my_dcc_functions[0], my_dcc_functions[1], my_dcc_functions[2],
+            my_dcc_functions[3], my_dcc_functions[4], my_dcc_functions[5],
+            my_dcc_functions[6], my_dcc_functions[7], my_dcc_functions[8],
+            my_dcc_functions[9], my_dcc_functions[10], my_dcc_functions[11],
+            my_dcc_functions[12]);
+#endif
 }
 
 /*
  * dcc_idle - Called when there is nothing else to do, can be used for things
  *            like lighting animations.
  */
-void dcc_idle(void) {
+void inline dcc_idle(void) {
 #if DEBUG_PERFORMANCE
     idle_count++;
 #endif
