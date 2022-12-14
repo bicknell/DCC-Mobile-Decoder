@@ -545,18 +545,22 @@ void inline dcc_decode(void) {
 #if DEBUG_DCC_DECODE_DECODER
                                 printf("Set consist dir=r address=%d", dcc_mesg[i + 1]);
 #endif
-
-                                //TODO Address is in dcc_mesg[i+1], 0x00 deactivates
                             }
                             my_dcc_consist = (uint16_t) dcc_mesg[i + 1];
-                            // S-9.2.1 2.3.1.1 CCCG=0000 Decoder Control
+                        // S-9.2.1 2.3.1.1 CCCG=0000 Decoder Control
                         } else {
                             // TTT=000 Digital Decoder Reset
                             if ((dcc_mesg[i] & 0xE) == 0x00) {
                                 // F=1 Hard Reset
                                 if (dcc_mesg[i] & 0x1) {
-                                    // Reset all of our CV's.
-                                    cv_factory_defaults();
+                                    // Reset volatile memory.
+                                    my_dcc_speed = 0;
+                                    my_dcc_direction = 0;
+                                    my_dcc_speedsteps = 128
+                                    cv_write(CV_CONSIST_ADDRESS, 0);       // CV19 -> 0
+                                    cv_write(CV_CONFIGURATION_DATA, 0x02); // Factory Default Value
+                                    cv_write(CV_INDEX_HIGH_BYTE, 0);       // Factory Default Value
+                                    cv_write(CV_INDEX_LOW_BYTE, 0);        // Factory Default Value
                                     // Reinitialize the dcc subsystem.
                                     dcc_initialize();
 #if DEBUG_DCC_DECODE_DECODER
@@ -564,14 +568,15 @@ void inline dcc_decode(void) {
 #endif     
                                     // F=0 Regular Reset
                                 } else {
-                                    // Reset all of our CV's.
-                                    cv_factory_defaults();
+                                    // Reset volatile memory.
+                                    my_dcc_speed = 0;
+                                    my_dcc_direction = 0;
+                                    my_dcc_speedsteps = 128;
                                     // Reinitialize the dcc subsystem.
                                     dcc_initialize();
 #if DEBUG_DCC_DECODE_DECODER
                                     printf("Reset requested");
 #endif     
-
                                 }
                                 // TTT=001 Factory Test Instruction
                             } else if ((dcc_mesg[i] & 0xE) == 0x01) {
@@ -595,11 +600,10 @@ void inline dcc_decode(void) {
 #if DEBUG_DCC_DECODE_DECODER
                                     printf("Set Advanced Addressing, use CV1 short address");
 #endif     
-
                                 }
                                 // S-9.2.1 2.3.1.2 TTT=111 Decoder Acknowledgement Request
                             } else if ((dcc_mesg[i] & 0xE) == 0x0E) {
-                                //TODO
+//TODO
                             }
                         }
                     }
