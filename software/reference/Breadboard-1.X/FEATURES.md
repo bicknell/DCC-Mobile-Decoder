@@ -61,11 +61,11 @@ The following is a list of configuration values implemented by the software.
   - Valid values are 1-127.
   - Used when CV29 bit 5 is 0.
 
-- CV7 Manufacturer's Version
+- CV7 Manufacturer's Version *READ ONLY*
   - Stores the version number of the decoder.
   - Currently always 167.
 
-- CV8 Manufacturer's ID
+- CV8 Manufacturer's ID *READ ONLY*
   - Stores the manufacturer's ID number assigned by the NMRA.
   - Currently always 13 for "Public Domain and DIY".
 
@@ -110,5 +110,3 @@ The following is a list of configuration values implemented by the software.
   - Bit 1 14/28 Speed Step: 0 = 14 speed step, 1 = 28 speed step.
     - Note that 128 speed step is always active.
   - Bit 5 Addressing: 0 = Short (CV1), 1 = Long (CV17/CV18)
-
-- 
