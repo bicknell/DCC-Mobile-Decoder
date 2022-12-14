@@ -556,7 +556,7 @@ void inline dcc_decode(void) {
                                     // Reset volatile memory.
                                     my_dcc_speed = 0;
                                     my_dcc_direction = 0;
-                                    my_dcc_speedsteps = 128
+                                    my_dcc_speedsteps = 128;
                                     cv_write(CV_CONSIST_ADDRESS, 0);       // CV19 -> 0
                                     cv_write(CV_CONFIGURATION_DATA, 0x02); // Factory Default Value
                                     cv_write(CV_INDEX_HIGH_BYTE, 0);       // Factory Default Value
