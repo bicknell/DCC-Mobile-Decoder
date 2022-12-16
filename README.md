@@ -12,10 +12,23 @@ could be used in actual locomotives.
 ***This project is not yet complete and does not work in its current state.***
 
 Path to a working decoder:
-  - [ ] Complete Hardware reference design. (Est 90% complete.)
-  - [ ] Initial basic software for reference design. (Est 80% complete.)
+  - [ ] Complete Hardware reference design - Breadboard-1. (Est 90% complete.)
+    - Need to verify proper hardware is in place to support analog mode.
+    - Need to verify the BackEMF measurement circuit is correct.
+  - [ ] Initial basic software for reference design. (Est 75% complete.)
+    - Need to add support for S-9.2.3 Service Mode programming.
   - [ ] Initial real decoder design. (Est 75% complete.)
+    - Draft of Wired-N-1A-6-1 has been produced.
+    - Needs further mineaturization (e.g. more DFN components), and possible
+      removal of gate resistors.
   - [ ] Documentation for above. (Est 60% complete.)
+
+At this point the decoder can be connected to a DCC signal (ops mode) and 
+correctly interprets speed, direction, functions f0-f12, ops mode CV programming,
+and consisting.
+
+Basic motor control has been implemented, but has not been tested with a real
+motor.
 
 ## Layout
 
