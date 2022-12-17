@@ -1993,8 +1993,8 @@
   (symbol (lib_id "Device:R_Small") (at 26.67 57.15 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 9ee7b1d5-1d4a-457a-868f-1c5ac3f6e002)
-    (property "Reference" "#PWR22" (id 0) (at 24.765 57.15 90))
-    (property "Value" "GND" (id 1) (at 28.575 57.15 90))
+    (property "Reference" "R22" (id 0) (at 24.765 57.15 90))
+    (property "Value" "10K" (id 1) (at 28.575 57.15 90))
     (property "Footprint" "Resistor_SMD:R_0402_1005Metric" (id 2) (at 26.67 57.15 0)
       (effects (font (size 1.27 1.27)) hide)
     )
@@ -2396,9 +2396,6 @@
     (path "/e3180954-93a9-436b-a521-e4fed8a1a13c"
       (reference "#PWR021") (unit 1) (value "+5V") (footprint "")
     )
-    (path "/9ee7b1d5-1d4a-457a-868f-1c5ac3f6e002"
-      (reference "#PWR22") (unit 1) (value "GND") (footprint "Resistor_SMD:R_0402_1005Metric")
-    )
     (path "/a5f90bef-a137-498d-948d-351928295469"
       (reference "#PWR023") (unit 1) (value "GND") (footprint "")
     )
@@ -2512,6 +2509,9 @@
     )
     (path "/d9984eea-e5d7-4728-b7aa-e608a2e306ce"
       (reference "R21") (unit 1) (value "220") (footprint "Resistor_THT:R_Radial_Power_L7.0mm_W8.0mm_Px2.40mm_Py2.30mm")
+    )
+    (path "/9ee7b1d5-1d4a-457a-868f-1c5ac3f6e002"
+      (reference "R22") (unit 1) (value "10K") (footprint "Resistor_SMD:R_0402_1005Metric")
     )
     (path "/b9faa690-021f-46a9-825e-888b17a3e0e8"
       (reference "U1") (unit 1) (value "6N137") (footprint "Package_DIP:DIP-8_W7.62mm")
