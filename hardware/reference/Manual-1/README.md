@@ -42,9 +42,20 @@ you can too!
 
 Here's a picture of how it looks on my bread board:
 
+![Picture of Breadboard](Manual-1.jpg)
 
-There's no right or wrong way.
+- In the upper right is a 5 pin header for connecting a PICKit4 programmer.
+- In the upper left is the MCLR supporting logic.
+- Above the PIC18F is a 100nf capacitor + 10uF capacitor for local decoupling.
+- The USB-to-TTL serial adapter is in the middle, with 5v power and ground connected
+  to the rails on both sides, and RX and TX connected to the PIC18F.
+- The bottom is a 6N137 opto-isolator UPSIDE DOWN (pin one lower right), which makes
+  my wiring neater.  On the left side is power, ground, and the pull-up.  On the
+  right side is the input with a diode, a resistor, and clip leads that go off to
+  my DCC command station.
 
+For most programming work LEDs on the outputs are unnecessary.  They can always be
+installed as-needed to troubleshoot particular behavior.
 
 ## DCC
 
