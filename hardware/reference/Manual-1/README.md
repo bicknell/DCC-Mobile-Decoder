@@ -57,4 +57,24 @@ One of the reasons the circuit is powered from the host computer and not the DCC
 is so that the chip is already fully booted by the time any DCC signal arrives.  This
 insures no messages are missed.
 
+## Extending
 
+There are no MOSFETs to drive loads.  A BS270 MOSFET is a good choice to drive higher
+loads from the function outputs.  They support up to 400ma, but warning, you might
+exceed the current the USB-to-TTL adapter can provide.  Check the manual!
+
+There is no motor controller to drive a motor.  There are a variety of boards avaialble
+online to be used in a bread board or stand alone that could be used.  MOSFETs, resistors
+and a capacitor could be arranged similar to the Breadboard-1 circuit to drive a motor
+as well.
+
+This could be powered from the rails using a diode bridge and linear regulator that 
+outputs 5v.  Make sure NOT to connect the USB-to-TTL 5v in that case, just RX, TX and
+GND.  Better yet, use an opto-isolator.
+
+## Debugging
+
+What works for us is having MPLab running to edit code and program the chip.  In a separate
+window a serial connection is kept open to receive debugging information back from the
+printf statements.  Using printf does slow the code, it may miss messages, but that's generally
+not a significant problem.
