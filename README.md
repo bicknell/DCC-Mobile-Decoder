@@ -15,8 +15,8 @@ Path to a working decoder:
   - [ ] Complete Hardware reference design - Breadboard-1. (Est 90% complete.)
     - Need to verify proper hardware is in place to support analog mode.
     - Need to verify the BackEMF measurement circuit is correct.
-  - [ ] Initial basic software for reference design. (Est 75% complete.)
-    - Need to add support for S-9.2.3 Service Mode programming.
+  - [ ] Initial basic software for reference design. (Est 85% complete.)
+    - Add readback and test.
   - [ ] Initial real decoder design. (Est 75% complete.)
     - Draft of Wired-N-1A-6-1 has been produced.
     - Needs further mineaturization (e.g. more DFN components), and possible
