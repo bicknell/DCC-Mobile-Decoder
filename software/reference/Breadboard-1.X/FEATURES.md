@@ -51,6 +51,18 @@ The software implements the following features:
         - ***Partially implemented:*** logs debug message only, no readback.
       - GG=11 Write Byte
       - GG=10 Bit Manipulation
+- Decodes "Service Mode" packets as described in NMRA standard S-9.2.3.
+  - Section C: Digital Decoder Entry to and Exit from Service Mode
+    - Entry implemented, exit not.
+  - Section E: Service Mode Instruction Packets
+    - Service Mode Instruction Packets for Direct Mode
+    - Service Mode Instruction Packets for Address-Only Mode
+    - Service Mode Instruction Packets for Physical Register Addressing
+    - Service Mode Instruction Packets for Paged CV Addressing
+    - Decoder Factory Reset
+  - Section F: Methods of Programming Required
+    - All supported
+
 
 
 ## Configuration Values
