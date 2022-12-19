@@ -141,3 +141,10 @@ For the motor output a bi-color Red/Green LED with an appropriate resistor has b
 across the motor output.  The color Red or Green will indicate the motor direction, and the
 LED will vary in intensity from the PWM drive of the motor.
 
+### Dummy Load
+
+When JP61 is installed a 100 Ohm resistor is connected to the motor outputs.  This
+enables "readback" functionality without having a motor connected, or generating a
+load on a command station when increasing the speed without having a motor attached.
+
+If a real motor is attached, JP61 should be left open.
