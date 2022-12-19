@@ -35,6 +35,7 @@ void    cv_write(uint16_t cv, uint8_t value);
 uint8_t cv_read(uint16_t cv);
 void    cv_factory_defaults(void);
 void    cv_check(void);
+void    cv_reset_next_time(void);
 
 /*
  * CV name to number mapping so we can use more meaningful names in the code.

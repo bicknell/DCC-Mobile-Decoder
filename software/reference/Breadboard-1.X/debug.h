@@ -53,6 +53,7 @@ extern "C" {
 #define DEBUG_DCC_DECODE_FEATURE       0  // Debug S-9.2.1 2.3.6 Feature Expansion Instructions
 #define DEBUG_DCC_DECODE_CV            0  // Debug S-9.2.1 2.3.7 Configuration Variable Access
 #define DEBUG_DCC_DECODE_NOT_FOR_US    0  // Show packets that are not for us (idle, other addresses).
+#define DEBUG_DCC_DECODE_SERVICE       0  // Debug S-9.3 Service Mode Instructions
 
 /*
  * Debugging of hardware operations
