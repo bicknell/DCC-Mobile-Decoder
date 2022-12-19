@@ -40,6 +40,7 @@ static volatile uint16_t   dcc_overrun           = 0;    // Number of DCC messag
 static uint8_t             cv_cv29;                      // Memory copy of CV29 so we don't have to read EEPROM.
 static uint8_t             cv_cv21;
 static uint8_t             cv_cv22;
+
 static uint8_t  dcc_speeds[] = {              // 28 Speed Step Table
     0,    // STOP
     0,    // ESTOP, since we don't do momentum yet can be the same.
@@ -246,15 +247,17 @@ void dcc_initialize(void) {
  * efficient to make these "global" variables.  These variables should not
  * be used outside of this function.
  */
-static uint16_t pkt_addr;     // DCC address in the packet.
-static uint8_t  xor = 0;      // Stores the xor value.
-static uint8_t  i;            // Loop index counter.
-static uint8_t  address_bits; // How many address bits in the message.
-static uint8_t  i_start;      // Index where instructions start.
-static uint16_t cv_address;   // Configuration variable address.
-static uint8_t  cv_value;     // Configuration variable value.
-static uint8_t  cv_bit;       // Configuration variable bit position.
-
+static uint16_t pkt_addr;                // DCC address in the packet.
+static uint8_t  xor = 0;                 // Stores the xor value.
+static uint8_t  i;                       // Loop index counter.
+static uint8_t  address_bits;            // How many address bits in the message.
+static uint8_t  i_start;                 // Index where instructions start.
+static uint16_t cv_address;              // Configuration variable address.
+static uint8_t  cv_value;                // Configuration variable value.
+static uint8_t  cv_bit;                  // Configuration variable bit position.
+static uint8_t  dcc_reset_received = 0;  // Previous packet was DCC Reset, used for entering Service Mode
+static uint8_t  dcc_service_mode = 0;    // Are we in service mode?
+static uint8_t  dcc_page = 1;            // Page Register, for service mode
 void inline dcc_decode(void) {
     
     // Compute checksum.
@@ -285,6 +288,7 @@ void inline dcc_decode(void) {
         my_dcc_speedsteps = 128;
         my_dcc_direction = DCC_FORWARD;
         motor_control(my_dcc_speedsteps, my_dcc_speed, my_dcc_direction);
+        dcc_reset_received = 1;
         // Special case, Broadcast Stop Packet
         } else if (((dcc_mesg[1] & 0xC1) == 0xC1) && (dcc_len == 3)) {
             my_dcc_speed = 0;
@@ -359,6 +363,143 @@ void inline dcc_decode(void) {
             return;
         }
 
+        // S-9.2.3 Service Mode Section C
+        if (dcc_reset_received && ((dcc_mesg[0] & 0x70) == 0x70)) {
+            dcc_service_mode = 1;
+        } else {
+            // Clear it, as we have some other sort of packet now.
+            dcc_reset_received = 0;
+        }
+
+        // S-9.2.3 Service Mode Section E
+        if (dcc_service_mode) {
+            // 3 Byte + 0111C000 + Zero High Bit = Address Mode
+            if ((dcc_len == 3) && ((dcc_mesg[0] & 0x77) == 0x70) && ((dcc_mesg[1] & 0x80) == 0x00)) {
+                // C = 1 Write Address
+                if (dcc_mesg[0] & 0x80) {
+                    cv_write(CV_CONSIST_ADDRESS, 0);
+                    cv_write(CV_PRIMARY_ADDRESS, (uint8_t)dcc_mesg[1]);
+                    cv_write(CV_CONFIGURATION_DATA, cv_read(CV_CONFIGURATION_DATA) & ~0x20);
+#if DEBUG_DCC_DECODE_SERVICE
+                    printf("Address mode write to CV1=%d, consisting off, short address.\r\n", (uint8_t)dcc_mesg[1]);
+#endif
+                // C = 0 Read Address
+                } else {
+#if DEBUG_DCC_DECODE_SERVICE
+                    printf("Address mode read from CV1=%d; actual %d.\r\n", (uint8_t)dcc_mesg[1], cv_read(CV_PRIMARY_ADDRESS));
+#endif
+//TODO, read back address.
+                }
+            // 3 Bytes + 0111CRRR = Register Mode
+            } else if ((dcc_len == 3) && ((dcc_mesg[0] & 0x70) == 0x70)) {
+                // Which register?
+                switch (dcc_mesg[0] & 0x07) {
+                    case 0x00: cv_address = 1;  break;
+                    case 0x01: cv_address = 2;  break;
+                    case 0x02: cv_address = 3;  break;
+                    case 0x03: cv_address = 4;  break;
+                    case 0x04: cv_address = 29; break;
+                    case 0x05: dcc_page = dcc_mesg[1];
+#if DEBUG_DCC_DECODE_SERVICE
+                        printf("Setting page regsiter to %d.\r\n", dcc_page);
+#endif
+                        return;
+                        break;
+                    case 0x06: cv_address = 7;  break;
+                    case 0x07: cv_address = 8;  break;
+                }
+
+                // Write
+                if (dcc_mesg[0] & 0x08) {
+                    // DECODER FACTORY RESET -- Special Case
+                    if ((dcc_page == 1) && (cv_address == 8) && (dcc_mesg[1] == 0x08)) {
+                        // Flag so we reset to factory defaults all CV's next boot.
+                        cv_reset_next_time();
+                        return;
+                    }
+                    if (dcc_page > 1) {
+                        cv_address = ((dcc_page - 1) * 4) + (dcc_mesg[0] & 0x07) + 1;
+#if DEBUG_DCC_DECODE_SERVICE
+                    printf("Paged Mode Write CV%d=%d (page=%d)\r\n", cv_address, dcc_mesg[1], dcc_page);
+#endif
+                    } else {
+#if DEBUG_DCC_DECODE_SERVICE
+                    printf("Register Mode Write CV%d=%d\r\n", cv_address, dcc_mesg[1]);
+#endif
+                    }
+                    cv_write(cv_address, dcc_mesg[1]);
+                // Read
+                } else {
+                    if (dcc_page > 1) {
+                        cv_address = ((dcc_page - 1) * 4) + (dcc_mesg[0] & 0x07) + 1;
+#if DEBUG_DCC_DECODE_SERVICE
+                    printf("Paged Mode Read CV%d=%d (page=%d)\r\n", cv_address, dcc_mesg[1], dcc_page);
+#endif
+                    } else {
+#if DEBUG_DCC_DECODE_SERVICE
+                    printf("Register Mode Read CV%d=%d\r\n", cv_address, dcc_mesg[1]);
+#endif
+                    }
+                    if (cv_read(cv_address) == dcc_mesg[1]) {
+//TODO: Read it back
+                    }
+                }
+            // 4 Byte + 0111CCAA = Direct Mode
+            } else if ((dcc_len == 4) && ((dcc_mesg[0] & 0x70) == 0x70)) {
+                cv_address = ((uint16_t) (dcc_mesg[0] & 0x03) << 8) | (uint16_t) dcc_mesg[1];
+                ++cv_address; // "The Configuration variable being addressed is the provided 10-bit address plus 1"
+
+                // Write byte
+                if ((dcc_mesg[0] & 0x0C) == 0x0C) {
+                    cv_write(cv_address, dcc_mesg[2]);
+#if DEBUG_DCC_DECODE_SERVICE
+                    printf("Direct Mode Write CV%d=%d\r\n", cv_address, dcc_mesg[2]);
+#endif
+                // Verify Byte
+                } else if ((dcc_mesg[0] & 0x0C) == 0x04) {
+                    if (cv_read(cv_address) == dcc_mesg[2]) {
+//TODO: Read it back
+                    }
+#if DEBUG_DCC_DECODE_SERVICE
+                    printf("Direct Mode Verify CV%d=%d; actual %d\r\n", cv_address, dcc_mesg[2], cv_read(cv_address));
+#endif
+                // Bit Manipulation
+                } else if ((dcc_mesg[0] & 0x0C) == 0x08) {
+                    cv_value = (dcc_mesg[2] & 0x08) >> 3;
+                    cv_bit = dcc_mesg[2] & 0x07;
+
+                    // Write bit
+                    if (dcc_mesg[2] & 0xF0) {
+                        // Set bit
+                        if (cv_value) {
+                            cv_write(cv_address, cv_read(cv_address) | (uint8_t) (cv_value << cv_bit));
+                                    // Clear bit
+                        } else {
+                            cv_write(cv_address, cv_read(cv_address) & ~(cv_value << cv_bit));
+                        }
+                        // This may have changed our address, CV29, etc, reinitialize.
+                        dcc_initialize();
+#if DEBUG_DCC_DECODE_SERVICE
+                                printf("Direct Mode Write Bit CV=%ld, bit=%d, value=%d", cv_bit, cv_value);
+#endif
+                    // Verify bit
+                    } else {
+#if DEBUG_DCC_DECODE_SERVICE
+                        printf("Direct Mode Verify Bit CV=%ld, bit=%d, value=%d, is=%d",
+                                cv_bit, cv_value, cv_read(cv_address) | (cv_value << cv_bit));
+#endif
+//TODO read it back to the command station!
+                    }
+                }
+            } else {
+#if DEBUG_DCC_DECODE_SERVICE
+                printf("Unknown service mode packet.\r\n");
+#endif
+            }
+            // We've fully processed service mode, time to leave.
+            return;
+        }
+
         // Does the address match our consist address, our regular address or the broadcast address?
         if ((my_dcc_consist == pkt_addr) || (my_dcc_address == pkt_addr) || (pkt_addr == 0x00)) {
 #if DEBUG_DCC_DECODE_EXTENDED    
@@ -394,7 +535,7 @@ void inline dcc_decode(void) {
 #endif
                         } else {
 #if DEBUG_DCC_DECODE_NOT_FOR_US
-                            printf("Ignoring E128 message for %d, consisted", my_dcc_address)
+                            printf("Ignoring E128 message for %d, consisted", my_dcc_address);
 #endif
                         }
                         ++i; // Increment again, as it was a 2-BYTE instruction
@@ -622,7 +763,7 @@ void inline dcc_decode(void) {
 #endif
                     } else {
 #if DEBUG_DCC_DECODE_NOT_FOR_US
-                        printf("Ignoring E28 message for %d, consisted", my_dcc_address)
+                        printf("Ignoring E28 message for %d, consisted", my_dcc_address);
 #endif
                     }                    
                 // S-9.2.1 2.3.3 CCC=011 Speed and Direction Instructions
@@ -640,7 +781,7 @@ void inline dcc_decode(void) {
 #endif
                     } else {
 #if DEBUG_DCC_DECODE_NOT_FOR_US
-                        printf("Ignoring E28 message for %d, consisted", my_dcc_address)
+                        printf("Ignoring E28 message for %d, consisted", my_dcc_address);
 #endif
                     }                                      
                 // S-9.2.1 2.3.6 CCC=110 Feature Expansion Instruction See TN-3-05

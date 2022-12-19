@@ -190,6 +190,18 @@ void cv_factory_defaults(void) {
     DATAEE_WriteByte(CV_E_MANUFACTURER_VERSION_C, 0);
 }
 
+/*
+ * cv_reset_next_time - Reset to factory defaults on next boot.
+ * 
+ * Used when a factory reset service mode packet comes in.
+ */
+void cv_reset_next_time(void) {
+#if DEBUG_CV_RESET
+    printf("Setting Manufacturer ID to 255.\r\n");
+#endif
+    DATAEE_WriteByte(CV_MANUFACTURER_ID, 255);
+}
+
 /* 
  * cv_check - Check if CV's are programmed.
  * 
