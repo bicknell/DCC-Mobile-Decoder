@@ -111,8 +111,8 @@ void cv_factory_defaults(void) {
     DATAEE_WriteByte(CV_DECELERATION_RATE, 0);
     DATAEE_WriteByte(CV_VHIGH, 0);
     DATAEE_WriteByte(CV_VMID, 0);
-    DATAEE_WriteByte(CV_MANUFACTURER_VERSION, 167);       // Magic Cookie Value
-    DATAEE_WriteByte(CV_MANUFACTURER_ID, 13);             // 13 == Public Domain
+// Manufacturer Version Out of Order, See Bottom
+// Manufacturer ID Out of Order, See Bottom
     DATAEE_WriteByte(CV_TOTAL_PWM_PERIOD, 0);
     DATAEE_WriteByte(CV_EMF_FEEDBACK_CUTOUT, 0);
     DATAEE_WriteByte(CV_PACKET_TIME_OUT_VALUE, 0);
@@ -188,6 +188,15 @@ void cv_factory_defaults(void) {
     DATAEE_WriteByte(CV_E_MANUFACTURER_VERSION_A, 0);
     DATAEE_WriteByte(CV_E_MANUFACTURER_VERSION_B, 0);
     DATAEE_WriteByte(CV_E_MANUFACTURER_VERSION_C, 0);
+    
+    // The entries above are carefully ordered numerically.
+    // These two have been pulled out, because they are used
+    // to determine if the flash is programmed, or if a factory
+    // reset is required.  If the processor got half way through
+    // the list above before losing power we want to re-do it
+    // on the next boot.  Thus these are set last to signify "done".
+    DATAEE_WriteByte(CV_MANUFACTURER_VERSION, 167);       // Magic Cookie Value
+    DATAEE_WriteByte(CV_MANUFACTURER_ID, 13);             // 13 == Public Domain
 }
 
 /*

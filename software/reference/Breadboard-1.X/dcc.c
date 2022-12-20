@@ -390,14 +390,21 @@ void inline dcc_decode(void) {
 #endif
 //TODO, read back address.
                 }
-            // 3 Bytes + 0111CRRR = Register Mode
+            // 3 Bytes + 0111CRRR = Page/Register Mode
             } else if ((dcc_len == 3) && ((dcc_mesg[0] & 0x70) == 0x70)) {
-                // Which register?
+                // Page mode is an extension of register mode.  When dcc_page = 1
+                // it is a register mode operation using the original 8 values.
+                // When dcc_page is set > 1, then the bottom 4 values are indexed
+                // by the page number.  This is a clever scheme as the first 
+                // 4 registers on page 1 are the same in both, so we can basically
+                // just write the code to handle Page mode and it does both.
                 switch (dcc_mesg[0] & 0x07) {
-                    case 0x00: cv_address = 1;  break;
-                    case 0x01: cv_address = 2;  break;
-                    case 0x02: cv_address = 3;  break;
-                    case 0x03: cv_address = 4;  break;
+                    case 0x00:
+                    case 0x01:
+                    case 0x02:
+                    case 0x03:
+                        cv_address = ((dcc_page - 1) * 4) + (dcc_mesg[0] & 0x03) + 1;
+                        break;
                     case 0x04: cv_address = 29; break;
                     case 0x05: dcc_page = dcc_mesg[1];
 #if DEBUG_DCC_DECODE_SERVICE
@@ -409,37 +416,27 @@ void inline dcc_decode(void) {
                     case 0x07: cv_address = 8;  break;
                 }
 
-                // Write
+                // Page/Register Write
                 if (dcc_mesg[0] & 0x08) {
                     // DECODER FACTORY RESET -- Special Case
+                    // An attempt to set CV8 to 00001000 is supposed to do a full
+                    // factory reset.  In service mode we may not have power long
+                    // enough to write all of our CV's, so we simply flag that it
+                    // needs to be done on the NEXT power up.
                     if ((dcc_page == 1) && (cv_address == 8) && (dcc_mesg[1] == 0x08)) {
                         // Flag so we reset to factory defaults all CV's next boot.
                         cv_reset_next_time();
                         return;
                     }
-                    if (dcc_page > 1) {
-                        cv_address = ((dcc_page - 1) * 4) + (dcc_mesg[0] & 0x07) + 1;
 #if DEBUG_DCC_DECODE_SERVICE
-                    printf("Paged Mode Write CV%d=%d (page=%d)\r\n", cv_address, dcc_mesg[1], dcc_page);
+                    printf("%s Mode Write CV%d=%d (page=%d)\r\n", (dcc_page > 1) ? "Paged" : "Register", cv_address, dcc_mesg[1], dcc_page);
 #endif
-                    } else {
-#if DEBUG_DCC_DECODE_SERVICE
-                    printf("Register Mode Write CV%d=%d\r\n", cv_address, dcc_mesg[1]);
-#endif
-                    }
                     cv_write(cv_address, dcc_mesg[1]);
-                // Read
+                // Page / Register Read
                 } else {
-                    if (dcc_page > 1) {
-                        cv_address = ((dcc_page - 1) * 4) + (dcc_mesg[0] & 0x07) + 1;
 #if DEBUG_DCC_DECODE_SERVICE
-                    printf("Paged Mode Read CV%d=%d (page=%d)\r\n", cv_address, dcc_mesg[1], dcc_page);
+                    printf("%s Mode Read CV%d=%d (page=%d)\r\n", (dcc_page > 1) ? "Paged" : "Register", cv_address, dcc_mesg[1], dcc_page);
 #endif
-                    } else {
-#if DEBUG_DCC_DECODE_SERVICE
-                    printf("Register Mode Read CV%d=%d\r\n", cv_address, dcc_mesg[1]);
-#endif
-                    }
                     if (cv_read(cv_address) == dcc_mesg[1]) {
 //TODO: Read it back
                     }
@@ -472,21 +469,22 @@ void inline dcc_decode(void) {
                     if (dcc_mesg[2] & 0xF0) {
                         // Set bit
                         if (cv_value) {
-                            cv_write(cv_address, cv_read(cv_address) | (uint8_t) (cv_value << cv_bit));
-                                    // Clear bit
+                            cv_write(cv_address, cv_read(cv_address) | (uint8_t) (1 << cv_bit));
+                        // Clear bit
                         } else {
-                            cv_write(cv_address, cv_read(cv_address) & ~(cv_value << cv_bit));
+                            cv_write(cv_address, cv_read(cv_address) & (~(1 << cv_bit)));
                         }
                         // This may have changed our address, CV29, etc, reinitialize.
                         dcc_initialize();
 #if DEBUG_DCC_DECODE_SERVICE
-                                printf("Direct Mode Write Bit CV=%ld, bit=%d, value=%d", cv_bit, cv_value);
+                                printf("Direct Mode Write Bit CV=%ld, bit=%d, value=%d", cv_address, cv_bit, cv_value);
 #endif
                     // Verify bit
                     } else {
 #if DEBUG_DCC_DECODE_SERVICE
                         printf("Direct Mode Verify Bit CV=%ld, bit=%d, value=%d, is=%d",
-                                cv_bit, cv_value, cv_read(cv_address) | (cv_value << cv_bit));
+                                cv_address, cv_bit, cv_value, 
+                                (cv_read(cv_address) & (1 << cv_bit)) >> cv_bit);
 #endif
 //TODO read it back to the command station!
                     }
@@ -923,7 +921,7 @@ void inline dcc_decode(void) {
 #if DEBUG_DCC_DECODE_CV
                                 printf("%d Write CV Long Form CV=%d, value=%02x", pkt_addr, cv_address, dcc_mesg[i + 2]);
 #endif
-                                // GG=10 Bit Manupulation
+                                // GG=10 Bit Manipulation
                             } else if ((dcc_mesg[i] & 0x0C) == 0x08) {
                                 cv_value = (dcc_mesg[i + 2] & 0x08) >> 3;
                                 cv_bit = dcc_mesg[i + 2] & 0x07;
@@ -931,21 +929,22 @@ void inline dcc_decode(void) {
                                 if (dcc_mesg[i + 2] & 0xF0) {
                                     // Set bit
                                     if (cv_value) {
-                                        cv_write(cv_address, cv_read(cv_address) | (uint8_t) (cv_value << cv_bit));
+                                        cv_write(cv_address, cv_read(cv_address) | (uint8_t) (1 << cv_bit));
                                         // Clear bit
                                     } else {
-                                        cv_write(cv_address, cv_read(cv_address) & ~(cv_value << cv_bit));
+                                        cv_write(cv_address, cv_read(cv_address) & (~(1 << cv_bit)));
                                     }
                                     // This may have changed our address, CV29, etc, reinitialize.
                                     dcc_initialize();
 #if DEBUG_DCC_DECODE_CV
-                                    printf("Write CV Long Form CV=%ld, bit=%d, value=%d", cv_bit, cv_value);
+                                    printf("Write CV Long Form CV=%ld, bit=%d, value=%d", cv_address, cv_bit, cv_value);
 #endif
                                     // Verify bit
                                 } else {
 #if DEBUG_DCC_DECODE_CV
                                     printf("Verify CV Long Form CV=%ld, bit=%d, value=%d, is=%d",
-                                            cv_bit, cv_value, cv_read(cv_address) | (cv_value << cv_bit));
+                                            cv_address, cv_bit, cv_value, 
+                                            (cv_read(cv_address) & (1 << cv_bit)) >> cv_bit);
 #endif
                                     //TODO read it back to the command station!
                                 }
