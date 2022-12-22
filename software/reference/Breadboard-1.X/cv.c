@@ -53,6 +53,18 @@ void cv_write(uint16_t cv, uint8_t value) {
     if (cv > 255) {
         return;
     }
+
+    // DECODER FACTORY RESET -- Special Case
+    // An attempt to set CV8 to 00001000 is supposed to do a full
+    // factory reset.  In service mode we may not have power long
+    // enough to write all of our CV's, so we simply flag that it
+    // needs to be done on the NEXT power up.
+    if ((cv == 8) && (value == 0x08)) {
+        // Flag so we reset to factory defaults all CV's next boot.
+        cv_reset_next_time();
+        return;
+    }
+
     // Scan through the list of read only CV's.
     i = cv_read_only;
     while (*i != 0) {

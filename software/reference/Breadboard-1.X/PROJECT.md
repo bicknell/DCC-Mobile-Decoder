@@ -11,7 +11,7 @@ Add the following Peripherals in the Resource Management window:
 - CWG1 - Used to generate waveforms for the H-Bridge.
 - MEMORY - Used to access the EEPROM memory.
 - PWM1_16BIT - Used to generate a PWM signal for the motor.
-- TMR0 - Set to fire once a second for statistics.
+- TMR0 - Set to fire every 20ms as a periodic timer.
 - TMR2 - Set to fire 80us after being tripped to read the DCC signal.
 - UART1 - A serial port output for debugging information.
 
@@ -122,12 +122,16 @@ Generates the PWM signal fed into CWG1 to control the motor speed.
 
 ### TMR0
 
-Configured as a once a second timer for statistics.
+Configured for every 20ms as a periodic timer.
 
 - Check "Enable Timer"
-- Clock prescaler "1:512"
+- Clock prescaler "1:16"
 - Clock source "LFINTOSC"
-- Requested period "1s"
+- Requested period "20ms"
+
+It is used to run the dcc_periodic routine which checks for things like
+needing to exit service mode, if periodic statistics should be checked,
+and if anlog mode should be enabled.
 
 ### TMR2
 
