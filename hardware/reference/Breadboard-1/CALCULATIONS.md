@@ -55,7 +55,15 @@
     - HSM0903 is 100V.
   - **PROJECT REQUIREMENT:** Id must be >= 1A.
     - HSM0903 is 3A.
-  - R31-R34 Gate resistors limit inrush current:
+  - PNP MOSFETs need high side drive
+    - R31/R33 are 10K pull ups to keep the PNP FET "off".
+    - Use DTC143ZE pre-biased transistor to drive to save resistors.
+      - Integrated 4.7K on the base input, 47K base to ground.
+      - **CALCULATE** Loss due to resistors: I = V/R, 5V / (4.7K + 47k) = 0.1ma to ground.
+      - **CALCULATE** Current C-E @30V: I = V / R, 30V / 10K = 3ma
+      - **CALCULATE** Transistor Gain = 80, B-E current = 3ma / 80 = 0.0375ma
+      - **CALCULATE** Total draw from micro: 0.1ma + 0.0375ma = 0.01375ma
+  - R32/R34 Gate resistors limit inrush current:
     - **PROJECT REQUIREMENT:** Micro-controller runs at 5v.
     - **PIC18F06Q40 DATASHEET** *29.1 Absolute Maximum Ratings* 25ma max sunk per pin
     - **PIC18F06Q40 DATASHEET** *29.1 Absolute Maximum Ratings* 25ma max sourced per pin
