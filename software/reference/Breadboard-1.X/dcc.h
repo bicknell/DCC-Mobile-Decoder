@@ -38,7 +38,7 @@ extern "C" {
 void DCC_ISR(void);
 void dcc_initialize(void);
 void inline dcc_decode(void);
-void inline dcc_performance(void);
+void inline dcc_periodic(void);
 void inline dcc_idle(void);
 
 /*

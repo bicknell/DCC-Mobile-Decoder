@@ -40,6 +40,7 @@ static volatile uint16_t   dcc_overrun           = 0;    // Number of DCC messag
 static uint8_t             cv_cv29;                      // Memory copy of CV29 so we don't have to read EEPROM.
 static uint8_t             cv_cv21;
 static uint8_t             cv_cv22;
+static uint8_t             dcc_good_packets      = 0;    // Incremented every time we get a good packet.
 
 static uint8_t  dcc_speeds[] = {              // 28 Speed Step Table
     0,    // STOP
@@ -276,6 +277,8 @@ void inline dcc_decode(void) {
     if (xor) {
         return;
     }
+    // Used to determine if we're getting valid DCC or not.
+    ++dcc_good_packets;
 
     // Broadcast packets are all address 0.
     if (dcc_mesg[0] == 0x00) {
@@ -418,16 +421,6 @@ void inline dcc_decode(void) {
 
                 // Page/Register Write
                 if (dcc_mesg[0] & 0x08) {
-                    // DECODER FACTORY RESET -- Special Case
-                    // An attempt to set CV8 to 00001000 is supposed to do a full
-                    // factory reset.  In service mode we may not have power long
-                    // enough to write all of our CV's, so we simply flag that it
-                    // needs to be done on the NEXT power up.
-                    if ((dcc_page == 1) && (cv_address == 8) && (dcc_mesg[1] == 0x08)) {
-                        // Flag so we reset to factory defaults all CV's next boot.
-                        cv_reset_next_time();
-                        return;
-                    }
 #if DEBUG_DCC_DECODE_SERVICE
                     printf("%s Mode Write CV%d=%d (page=%d)\r\n", (dcc_page > 1) ? "Paged" : "Register", cv_address, dcc_mesg[1], dcc_page);
 #endif
@@ -970,12 +963,31 @@ void inline dcc_decode(void) {
 /*
  * dcc_performance - Print DCC performance measurements.
  * 
- * This is called once a second (TMR0) by the main loop to print
- * performance and status information.
+ * This is called every 20ms (TMR0) by the main loop to
+ * perform period functions.  These include:
+ *   - Checking if exiting service mode is warranted.
+ *   - Printing performance statistics once per second.
  */
-void inline dcc_performance(void) {
+uint8_t dcc_per_second = 49;
+uint8_t dcc_good_last = 255;
+void inline dcc_periodic(void) {
     uint16_t address;
     
+    // This means we've received no valid DCC packets in the last 20ms.
+    if (dcc_service_mode && (dcc_good_last == dcc_good_packets)) {
+        dcc_service_mode = 0; // Drop out of service mode per S-9.2.3 Section C
+        dcc_page = 1;         // Page Register back to default
+#if DEBUG_STATUS
+        printf("Dropping out of service mode.\r\n");
+#endif
+    }
+    dcc_good_last = dcc_good_packets;
+    
+    // Timer is every 20 ms, so every 50 timers is once per second.
+    // Printing statistics more often is too hard to read.
+    --dcc_per_second;
+    if (dcc_per_second == 0) {
+        dcc_per_second = 49;
 #if DEBUG_PERFORMANCE
     // Print how many times the counter was incremented to give us an idea of idle time.
     printf("Perf: %lu/%u/%u (%u, %u)\r\n", idle_count, dcc_interrupts, dcc_drops,
@@ -1001,6 +1013,7 @@ void inline dcc_performance(void) {
             my_dcc_functions[9], my_dcc_functions[10], my_dcc_functions[11],
             my_dcc_functions[12]);
 #endif
+    }
 }
 
 /*

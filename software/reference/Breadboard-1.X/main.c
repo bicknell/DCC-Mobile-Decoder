@@ -117,8 +117,8 @@ void main(void)
         }
 
         // Control reaches here when TMR0 has gone off.
-        // Print DCC performance statistics and clear, if enabled.
-        dcc_performance();
+        // Perform periodic functions every 20ms.
+        dcc_periodic();
     }
 }
 /**
