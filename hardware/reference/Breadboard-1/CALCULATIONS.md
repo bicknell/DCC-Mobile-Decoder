@@ -3,18 +3,9 @@
 ## Data Sheets
 
 - Micro-processor: [PIC18F06Q40](https://ww1.microchip.com/downloads/aemDocuments/documents/MCU08/ProductDocuments/DataSheets/PIC18F06-16Q40-Data-Sheet-40002216D.pdf)
-- H-Bridge High Side MOSFETS: [NCE2309](https://datasheet.lcsc.com/lcsc/2004201605_Wuxi-NCE-Power-Semiconductor-NCE2309_C502865.pdf)
-  - SOT-23, P-Channel, Vdss -60V, Rds(on) 140 mOhm, Id -1.3A, Vgs(th) -2.0v max -2.6v.
-  - "2309" is a common P-Channel MOSFET, with many manufactuers having slight variations.
-- H-Bridge High Side Driver: [DTC143ZCA](https://datasheet.lcsc.com/lcsc/1809140113_Jiangsu-Changjing-Electronics-Technology-Co---Ltd--DTC143ZCA_C15236.pdf)
-  - SOT-23, Vcc 50V, Io 100mA, R1 = 4.7K, R2 = 47K
-  - This is a "pre-biased" or "digital" transistor.  It is an NPN transistor with two resistors
-    in the same package.  This saves two additional discrete components.  It is used to drive
-    the P-Channel MOSFETs.
-- H-Bridge Low Side MOSFETS: [DMN6140L-7](https://datasheet.lcsc.com/lcsc/1810101252_Diodes-Incorporated-DMN6140L-7_C156306.pdf)
-  - SOT-23, N-Channel, Vdss 60V, Rds(on) 92 mOhm, Id 1.6A, Vgs(th) 1.0v max 3.0v.
-  - There is no particular common part number for this part, but a wide variety of similar
-    parts is available.
+- Motor Driver: [DRV8870DDAR](https://datasheet.lcsc.com/lcsc/1809050151_Texas-Instruments-DRV8870DDAR_C86590.pdf)
+  - Max VM: 50v
+  - Peak current: 3.6A.
 - Functions MOSFET: [2N7002K](https://datasheet.lcsc.com/lcsc/2111241030_Jiangsu-Changjing-Electronics-Technology-Co---Ltd--2N7002K_C2910165.pdf)
   - SOT-23, Vdss 60V, Rds(on) 2.5 Ohm, Id 340ma Vgs(th) 1.3v max 2.5v
   - 2N7002 is a common MOSFET.  Many manufacturers have part numbers that include a suffix
@@ -65,53 +56,31 @@
 
 ## H-Bridge
 
-- Q31-Q32 High Side MOSFETs
-  - **PROJECT REQUIREMENT:** Vgs must be < 6V, the minimum track voltage.
-    - NCE2309 is max 2.5v.
-  - **PROJECT REQUIREMENT:** Vds must be >= 30V.
-    - NCE2309 is 60V.
-  - **PROJECT REQUIREMENT:** Id must be >= 1A.
-    - NCE2309 is 1.3A.
-  - PNP MOSFETs need high side drive
-    - R31/R32 are 10K pull ups to keep the PNP FET "off".
-    - Q35-Q36 are DTC143ZCA pre-biased transistor to drive to save resistors.
-      - Integrated 4.7K on the base input, 47K base to ground.
-      - **CALCULATE** Loss due to resistors: I = V/R, 5V / (4.7K + 47k) = 0.1ma to ground.
-      - **CALCULATE** Current C-E @30V: I = V / R, 30V / 10K = 3ma
-      - **CALCULATE** Transistor Gain = 80, B-E current = 3ma / 80 = 0.0375ma
-      - **CALCULATE** Total draw from micro: 0.1ma + 0.0375ma = 0.01375ma
-- Q32-Q33 Low Side MOSFETs
-  - **PROJECT REQUIREMENT:** Vgs must be < 5V, the micro-controller output voltage.
-    - DMN6140L-7 is max 3v.
-  - **PROJECT REQUIREMENT:** Vds must be >= 30V.
-    - DMN6140L-7 is 60V.
-  - **PROJECT REQUIREMENT:** Id must be >= 1A.
-    - DMN6140L-7 is 1.6A.
-  - R33/R34 Gate resistors limit inrush current:
-    - **PROJECT REQUIREMENT:** Micro-controller runs at 5v.
-    - **PIC18F06Q40 DATASHEET** *29.1 Absolute Maximum Ratings* 25ma max sunk per pin
-    - **PIC18F06Q40 DATASHEET** *29.1 Absolute Maximum Ratings* 25ma max sourced per pin
-    - **PIC18F06Q40 DATASHEET** *29.1 Absolute Maximum Ratings* 110ma max sunk all ports
-    - **PIC18F06Q40 DATASHEET** *29.1 Absolute Maximum Ratings* 70ma max sourced all ports
-    - **CALCULATE:** R = 5v / 0.025ma = 200 Ohm
-      - E48 & E96 standard value of 202 Ohm
-      - 220 Ohm is a popular value that may be cheaper.
-    - 0805 220 1% 1/8W resistors are generally avalable.
-- **PROJECT REQUIREMENT:** D31-D33 Snubbing Diodes must be rated for >= 30V.
-- R35 & R36 BackEMF sense resistors must put max voltage in the 0-5V range of the
-  micro-controller: (Note Same as DCC Dividers Above)
+- U31 Motor Driver
+  - **PROJECT REQUIREMENT:** Must operate on a minimum track voltage of 7 volts.
+    - Min VM is 6.5v.
+  - **PROJECT REQUIREMENT:** Must operate on a maxium track voltage of 30 volts.
+    - Max VM is 50v.
+  - **PROJECT REQUIREMENT:** Must operate at 5V logic.
+    - Vi is 0 5.5V.
+  - **NOTE:** PWM frequency mut be no greater than 100kHz when driving.
+- R31, R32, R33 BackEMF sense resistors must put max voltage in the 0-5V range of the
+  micro-controller:
   - **PROJECT REQUIREMENT:** Vdrive max = 30v
   - **PROJECT REQUIREMENT:** Vdrive min = 6v
   - **PIC18F06Q40 DATASHEET:** *Parameter D001:* Vdd = 5v
   - **PIC18F06Q40 DATASHEET:** *Parameter D141:* Input Low Voltage I/O Port Schmitt Trigger Buffer Max 0.2 * Vdd = 1v
-  - **CALCULATE:** Voltage divider equation: 5 = (30 * R2) / (R1 + R2)
-    - Select R2 = 1.33K (Value needed for diagnostic LEDs)
-    - Result: R1 = 6.65K which is an E96 resistor value.
-    - Check minimum voltage: (6 * 1330) / (6650 + 1330) = 1v
-  - **CALCULATE:** Imax = 30v / ((6650 + 1330) = 3.75ma @ 30V = .112 watts
-    - 1/8 Watt resistors are sufficient.
-  - 0805 1.33K & 6.65K 1% 1/8W resistors are generally avalable.
-- C31 provides high frequency noise reduction, and is determined experimentally.
+  - When the motor is driving, one of R31/R32 will be connected to groud (depending on
+    direction).  Thus the Resistance to Ground will be 1/R31 + 1/R33 = 1/Rground
+  - **CALCULATE:** Voltage divider equation: 5 = (30 * Rground) / (R31 + Rground)
+    - Select R33 = 1.33K (Value needed for diagnostic LEDs)
+    - Result: R31 = 4.511K, 4.53K is a standard E96 resistor value.
+    - **CALCULATE:** 1/Rground = 1/1.33K + 1/4.53k, Rground = 1.03k
+    - Check minimum voltage:
+      - **CALCULATE:** (6 * 1.03K) / (4.53K + 1.03K) = 1.11v
+  - **CALCULATE:** Imax = 30v / (4.53K + 1.03K) = 5.4ma @ 30V = .162 watts
+    - 1/4 Watt resistors are necessary..
+  - 0805 1.33K & 4.53K 1% 1/4W resistors are generally avalable.
 
 ## Functions
 
