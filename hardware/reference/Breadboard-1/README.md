@@ -73,22 +73,15 @@ All other connections were placed to make routing the PCB traces
 simpler.
 
 
-### H-Bridge
+### Motor Driver H-Bridge
 
-The H-Bridge controls the current to the motor.  It is driven by a PWM signal generated
-by the micro-controller.  The software generates 4 PWM signals, P1A-P1D, which are used
-to control speed and direction.
+This design uses a Texas Instruments 8870DDA motor driver IC.
+It includes an integrated H-Bridge, gate driver circuitry, overload
+protection and other features in a very small form factor.  There
+are also multiple pin-compatable knock offs of this chip available.
 
-The H-bridge is simply 4 high power MOSFETs arranged in an H
-configuration.  This design uses two discrete dual MOSFET chips
-each with 1 PNP and 1NPN MOSFET, which is a common arrangement.
-Resistors are placed on the gate inputs to prevent inrush from
-damaging the micro-controller. Dodes D31-D24 are placed across each
-MOSFET to disapate any reverse current.
-
-In order to calculate BackEMF, a 100nf capacitor C31 is added to
-reduce signal noise.  The resistors R35 and R36 then reduce the
-voltage to an appropriate level for the analog input of the
+In order to calculate BackEMF the resistors R31, R32 and R33 then 
+reduce the voltage to an appropriate level for the analog input of the
 micro-controller.  By monitoring this voltage the micro-controller
 can calculate the load.
 
