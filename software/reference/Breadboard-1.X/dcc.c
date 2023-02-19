@@ -963,12 +963,12 @@ void inline dcc_decode(void) {
 /*
  * dcc_performance - Print DCC performance measurements.
  * 
- * This is called every 20ms (TMR0) by the main loop to
+ * This is called every 25ms (TMR0) by the main loop to
  * perform period functions.  These include:
  *   - Checking if exiting service mode is warranted.
  *   - Printing performance statistics once per second.
  */
-uint8_t dcc_per_second = 49;
+uint8_t dcc_per_second = 39;
 uint8_t dcc_good_last = 255;
 void inline dcc_periodic(void) {
     uint16_t address;
@@ -983,11 +983,11 @@ void inline dcc_periodic(void) {
     }
     dcc_good_last = dcc_good_packets;
     
-    // Timer is every 20 ms, so every 50 timers is once per second.
+    // Timer is every 25 ms, so every 40 timers is once per second.
     // Printing statistics more often is too hard to read.
     --dcc_per_second;
     if (dcc_per_second == 0) {
-        dcc_per_second = 49;
+        dcc_per_second = 39;
 #if DEBUG_PERFORMANCE
     // Print how many times the counter was incremented to give us an idea of idle time.
     printf("Perf: %lu/%u/%u (%u, %u)\r\n", idle_count, dcc_interrupts, dcc_drops,
@@ -1014,6 +1014,7 @@ void inline dcc_periodic(void) {
             my_dcc_functions[12]);
 #endif
     }
+    function_control(); // Perform animations for functions.
 }
 
 /*
