@@ -24,6 +24,7 @@
 #include <stdint.h>
 #include "mcc_generated_files/mcc.h"
 #include "cv.h"
+#include "dcc.h"
 #include "debug.h"
 
 /*
@@ -200,6 +201,13 @@ void cv_factory_defaults(void) {
     DATAEE_WriteByte(CV_E_MANUFACTURER_VERSION_A, 0);
     DATAEE_WriteByte(CV_E_MANUFACTURER_VERSION_B, 0);
     DATAEE_WriteByte(CV_E_MANUFACTURER_VERSION_C, 0);
+    DATAEE_WriteByte(CV_F0_FX, 0xC0); // Both directions active, always on.
+    DATAEE_WriteByte(CV_F1_FX, 0xC1); // Both directions active, always on.
+    DATAEE_WriteByte(CV_F2_FX, 0xC2); // Both directions active, always on.
+    DATAEE_WriteByte(CV_F3_FX, 0xC3); // Both directions active, always on.
+    DATAEE_WriteByte(CV_F4_FX, 0xC4); // Both directions active, always on.
+    DATAEE_WriteByte(CV_F5_FX, 0xC5); // Both directions active, always on.
+    DATAEE_WriteByte(CV_F6_FX, 0xC6); // Both directions active, always on.
     
     // The entries above are carefully ordered numerically.
     // These two have been pulled out, because they are used
@@ -248,4 +256,13 @@ void cv_check(void) {
     } else {
         cv_factory_defaults();
     }
+    
+    // Load things we want to cache:
+    my_dcc_effects[0] = cv_read(CV_F0_FX);
+    my_dcc_effects[1] = cv_read(CV_F1_FX);
+    my_dcc_effects[2] = cv_read(CV_F2_FX);
+    my_dcc_effects[3] = cv_read(CV_F3_FX);
+    my_dcc_effects[4] = cv_read(CV_F4_FX);
+    my_dcc_effects[5] = cv_read(CV_F5_FX);
+    my_dcc_effects[6] = cv_read(CV_F6_FX);
 }

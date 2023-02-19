@@ -130,6 +130,14 @@ void    cv_reset_next_time(void);
 #define CV_E_MANUFACTURER_VERSION_A  109
 #define CV_E_MANUFACTURER_VERSION_B  110
 #define CV_E_MANUFACTURER_VERSION_C  111
+
+#define CV_F0_FX                     120
+#define CV_F1_FX                     121
+#define CV_F2_FX                     122
+#define CV_F3_FX                     123
+#define CV_F4_FX                     124
+#define CV_F5_FX                     125
+#define CV_F6_FX                     126
                                           /* Reserved for manufacturer use */
 #define CV_INDEX_START               257
 #define CV_INDEX_END                 512

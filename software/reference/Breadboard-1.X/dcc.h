@@ -51,6 +51,7 @@ uint8_t             my_dcc_ndot           = 0;    // NDOT
 uint16_t            my_dcc_consist        = 0;    // Configured consist address
 uint8_t             my_dcc_consist_ndot   = 0;    // NDOT in consist.
 uint8_t             my_dcc_functions[13]  = {0};  // DCC Packet Function State
+uint8_t             my_dcc_effects[13]    = {0};  // Effects cached from CV's.
 uint8_t             my_dcc_speedsteps     = 0;    // DCC Packet Speed Steps
 uint8_t             my_dcc_speed          = 0;    // DCC Packet Speed
 uint8_t             my_dcc_direction      = 0;    // DCC Packet Direction, 0 == forward, 1 == reverse
