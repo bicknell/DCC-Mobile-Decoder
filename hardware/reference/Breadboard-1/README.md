@@ -125,11 +125,12 @@ programmed via a pogo pin adapter.
 
 One 5-pin 0.1" (2.54mm) pin header is provided for RS-232 serial
 output.  The pin-order is typical of many "USB to TTL Serial"
-adapters.  A typical decoder would not include this port. For
-software development purposes this port is configured as a serial
-port allowing the use of functions like `printf` or `putc` in the
-code.  This allows the programmer to extract more information during
-the code debugging phase.
+adapters.  Generally a 5-pin pin SOCKET would be installed if this
+option is desired.  A typical decoder would not include this port.
+For software development purposes this port is configured as a
+serial port allowing the use of functions like `printf` or `putc`
+in the code.  This allows the programmer to extract more information
+during the code debugging phase.
 
 ### Diagnostic LEDs
 
