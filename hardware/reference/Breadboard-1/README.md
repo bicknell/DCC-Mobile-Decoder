@@ -105,22 +105,31 @@ user needs no external lights.
 
 ### External Connectivity
 
-Two 6-pin 0.1" (2.54mm) pin headers are provided for connectivity to a standard bread board.
-The board has been physically designed to connect to the top of a bread board in positions
-1-6 across the middle.  In a typical decoder these would be exposed as solder pads for wire
-connections.
+Two 6-pin 0.1" (2.54mm) pin headers are provided for connectivity
+to a standard bread board.  The board has been physically designed
+to connect to the top of a bread board in positions 1-6 across the
+middle.  In a typical decoder these would be exposed as solder pads
+for wire connections.
 
-At the top of the board J3 provides a 5 pin ICSP header.  It's physical layout has been
-designed so that a PICKIT4 programmer can be plugged in directly and will be face up at
-the top of the board.  In a typical decoder these would be exposed as test points or solder
-pads to allow the board to be programmed via a pogo pin adapter.
+One 5-pin 0.1" (2.54mm) pin header is provided for connecting an
+oscilloscope.  The DCC signal as seen by the processor, the PWM
+signal to the motor driver, and the BackEMF measurement are all
+exposed, along with a ground.
 
-A 6 pin female header (optional) using the standard pinout for many
-"USB to TTL Serial" adapters has been included.  A typical decoder
-would not include this port. For software development purposes this
-port is configured as a serial port allowing the use of functions
-like `printf` or `putc` in the code.  This allows the programmer
-to extract more information during the code debugging phase.
+One 5-pin 0.1" (2.54mm) pin header is provided for connecting an
+ICSP programmer..  It's physical layout has been designed so that
+a PICKIT4 programmer can be plugged in directly and will be face
+up at the top of the board.  In a typical decoder these would be
+exposed as test points or solder pads to allow the board to be
+programmed via a pogo pin adapter.
+
+One 5-pin 0.1" (2.54mm) pin header is provided for RS-232 serial
+output.  The pin-order is typical of many "USB to TTL Serial"
+adapters.  A typical decoder would not include this port. For
+software development purposes this port is configured as a serial
+port allowing the use of functions like `printf` or `putc` in the
+code.  This allows the programmer to extract more information during
+the code debugging phase.
 
 ### Diagnostic LEDs
 
