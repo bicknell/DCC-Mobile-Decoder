@@ -98,7 +98,8 @@ This design supports functions F0-F6.
 
 Functions F0F (front headlight) and F0R (rear headlight) are driven directly by the PIC.
 In most designs these are fixed lights on the circuit board, so the exact current draw is
-known in advance.  The resistors are sized to limit the LEDs to approximately 5ma at 5v.
+known in advance.  The resistors are sized to limit the LEDs to approximately 5ma when
+driven by the 5v output.
 
 Functions F1-F6 are designed to be connected to external device in a "common anode"
 confuration.  To ease development this particular design provides both an LED and a 
@@ -106,8 +107,8 @@ connection for an external device.
 
 Vdrive power is provided as a common anode source.  The MOSFET connects to ground when turned
 on by the micro-processor.  A resistor is provided on the gate of each MOSFET to manage
-inrush current.  In most mobile decoders the resistor and diode combination for an indicator
-light would be omitted.
+inrush current.  An LED with resistor sized for track power are also installed so the
+user needs no external lights.
 
 ### External Connectivity
 
@@ -130,16 +131,18 @@ to extract more information during the code debugging phase.
 
 ### Diagnostic LEDs
 
-This decoder is not designed to go into a locomotive.  It's purpose is to teach about
-DCC, and to enable rapid software development.  Because it is unlikely to be in a locomotive,
-diagnostic LEDs have been added to F1-F6 and also the motor output.
+This decoder is not designed to go into a locomotive.  It's purpose
+is to teach about DCC, and to enable rapid software development.
+Because it is unlikely to be in a locomotive, diagnostic LEDs have
+been added to F1-F6 and also the motor output.
 
-For F0-F6 an appropriate LED + Resistor has been added so that there is a visual indicator if
-a function is on or off.
+For F0-F6 an appropriate LED + Resistor has been added so that there
+is a visual indicator if a function is on or off.
 
-For the motor output a bi-color Red/Green LED with an appropriate resistor has been added
-across the motor output.  The color Red or Green will indicate the motor direction, and the
-LED will vary in intensity from the PWM drive of the motor.
+For the motor output a bi-color Red/Green LED with an appropriate
+resistor has been added across the motor output.  The color Red or
+Green will indicate the motor direction, and the LED will vary in
+intensity from the PWM drive of the motor.
 
 ### Dummy Load
 
