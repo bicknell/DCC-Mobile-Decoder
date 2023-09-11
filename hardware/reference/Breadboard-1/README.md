@@ -162,6 +162,8 @@ When JP61 is installed a 100 Ohm resistor is connected to the motor outputs.  Th
 enables "readback" functionality without having a motor connected, or generating a
 load on a command station when increasing the speed without having a motor attached.
 
-Power dissipated 
-
-If a real motor is attached, JP61 should be left open.
+**WARNING** If the jumper is enabled, the voltge high enough, and the motor speed
+high enough the resistor will get very hot and/or burn out.  This is intended to
+enable read-back in service mode only, and not as a dummy load for continuous
+operation.  Recommend that jumper JP61 only be installed when performing service
+mode work.
