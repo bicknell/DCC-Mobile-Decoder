@@ -37,7 +37,7 @@
   recommendation for an ME6203A50M3G
   - C11 & C12 0805 50V 10uF X5R 10% are generally available.
 - **PROJECT REQUIREMENT:** D11-D14 & C11 must be rated for >= 30V.
-  - B5819WS diodes are rated for 1A.
+  - B5819WS diodes are rated for 40V.
   - C11 & C12 0805 50V 10uF X5R 10% are generally available.
 - **PROJECT REQUIREMENT:** D11-D14 must be rated for >= 1A.
   - B5819WS diodes are rated for 1A.
@@ -97,21 +97,25 @@
       - E48 & E96 standard value of 202 Ohm
       - 220 Ohm is a popular value that may be cheaper.
     - 0805 220 1% 1/8W resistors are generally avalable.
-- **PROJECT REQUIREMENT:** D31-D33 Snubbing Diodes must be rated for >= 30V.
 - R35 & R36 BackEMF sense resistors must put max voltage in the 0-5V range of the
   micro-controller: (Note Same as DCC Dividers Above)
   - **PROJECT REQUIREMENT:** Vdrive max = 30v
-  - **PROJECT REQUIREMENT:** Vdrive min = 6v
   - **PIC18F06Q40 DATASHEET:** *Parameter D001:* Vdd = 5v
-  - **PIC18F06Q40 DATASHEET:** *Parameter D141:* Input Low Voltage I/O Port Schmitt Trigger Buffer Max 0.2 * Vdd = 1v
   - **CALCULATE:** Voltage divider equation: 5 = (30 * R2) / (R1 + R2)
-    - Select R2 = 1.33K (Value needed for diagnostic LEDs)
-    - Result: R1 = 6.65K which is an E96 resistor value.
-    - Check minimum voltage: (6 * 1330) / (6650 + 1330) = 1v
-  - **CALCULATE:** Imax = 30v / ((6650 + 1330) = 3.75ma @ 30V = .112 watts
-    - 1/8 Watt resistors are sufficient.
-  - 0805 1.33K & 6.65K 1% 1/8W resistors are generally avalable.
-- C31 provides high frequency noise reduction, and is determined experimentally.
+    - *NOTE:* There are 3 resistors.  One of the uppers will be tied to ground, the
+      other to motor voltage based on the direction of the H-Bridge.
+    - Select LOWER = 1.33K (Value needed for diagnostic LEDs)
+    - Thus R1 = UPPER
+    - Thus 1/R2 = 1/UPPER + 1/LOWER, or R2 = UPPER * LOWER / UPPER + LOWER
+    - Thus 5 = (30 * ((UPPER * LOWER) / (UPPER + LOWER)) / (UPPER + ((UPPER * LOWER) / (UPPER + LOWER)))
+      - Simplified: LOWER = UPPER / 4
+    - Select LOWER = 1.33K (Value needed for diagnostic LEDs)
+    - Result: UPPER = 5.32K, closest E96 resistor is 5.36K
+    - Result: UPPER + LOWER in parallel = 1065 Ohms
+  - 0805 1.33K & 5.36K 1% 1/8W resistors are generally avalable.
+- C31-C32 provide high frequency noise snubbing, and protect the rest of the 
+  Vdrive components from receiving fluctuations from the motor.  Value is a 
+  guess.
 
 ## Functions
 
@@ -177,3 +181,28 @@ generally be present on mobile decoders.
     - LED should still light at 2.8ma
   - 1.40 KOhms is a standard E48 and E96 series resistor value.
     - 0805 1% 1/8W resistors are generally available.
+
+### Dummy Load
+
+When JP61 is installed a 100 Ohm resistor is connected to the motor outputs.  This
+enables "readback" functionality without having a motor connected, or generating a
+load on a command station when increasing the speed without having a motor attached.
+
+- Dummy load resistor R61
+  - **PROJECT REQUIREMENT:** Vdrive max is 30v
+  - **PROJECT REQUIREMENT:** Vdrive min is 6v
+  - **NMRA Standard S9.2.3:** "Basic acknowledgment is defined by the Digital Decoder providing 
+    an increased load (positive-delta) on the programming track of at least 60 mA for 6 ms +/-1 ms."
+  - **CALCULATE:** R = V / I
+  - **CALCULATE:** 30 / 0.060, R = 500 Ohm
+  - **CALCULATE:** 6 / 0.060, R = 100 Ohm
+  - 100 Ohms is needed at the lowest voltage, recalcuate at highest.
+  - **CALCULATE:** I = V / R
+  - **CALCULATE:** 30 / 100 = .300, aka 300ma
+  - **CALCULATE:** P = V * I
+  - **CALCULATE:** P = 30 * .3, W = 9W
+  - A 9W resistor would need to be a wire-wound, 2" long device.  But we can take advantage of the fact
+    that readback is only 60ma for 6ma, e.g. a burst.  Many resistors are rated for 5x burst, so
+    we consider a 2 Watt 100 Ohm, 5x burst option.
+  - 100 Ohm 2 Watt 5% resistors in a 2512 case are readily available.
+
