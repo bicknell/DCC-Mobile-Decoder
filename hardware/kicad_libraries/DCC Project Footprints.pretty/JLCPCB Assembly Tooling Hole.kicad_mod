@@ -1,8 +1,8 @@
 (footprint "JLCPCB Assembly Tooling Hole" (version 20211014) (generator pcbnew)
   (layer "F.Cu")
-  (tedit 6504CF7B)
+  (tedit 6504FF21)
   (descr "See https://jlcpcb.com/help/article/47-How-to-add-tooling-holes-for-PCB-assembly-order")
-  (attr through_hole exclude_from_bom)
+  (attr through_hole board_only exclude_from_bom)
   (fp_text reference "REF**" (at 0 -1.5 unlocked) (layer "F.SilkS") hide
     (effects (font (size 1 1) (thickness 0.15)))
     (tstamp 62681247-dfee-4fe9-a797-fef33eb74a7f)
@@ -11,7 +11,7 @@
     (effects (font (size 1 1) (thickness 0.15)))
     (tstamp dc6a9fd0-8a12-4e12-ba4e-7f59c3508f44)
   )
-  (fp_text user "${REFERENCE}" (at 0 -1.5 unlocked) (layer "F.Fab")
+  (fp_text user "${REFERENCE}" (at 0 -1.5 unlocked) (layer "F.Fab") hide
     (effects (font (size 1 1) (thickness 0.15)))
     (tstamp 5ff98705-cf67-403d-b0a1-4c57aba0bbdc)
   )
