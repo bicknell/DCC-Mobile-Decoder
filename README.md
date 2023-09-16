@@ -25,6 +25,7 @@ Path to a working decoder:
       - Obtain a manufacturer ID number?
         - Assign version numbers to decoders?
     - DCC Protocol:
+      - Test/debug service mode programming, implemented but not tested.
       - Implement the "Factory Test" instruction?  What would it do?
       - Figure out what to send back for S-9.2.1 2.3.1.3 TTT=111 Decoder Acknowledgement Request
       - Pulse the motor for readback when in service mode.
