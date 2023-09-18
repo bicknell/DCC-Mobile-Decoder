@@ -40,7 +40,10 @@ View the [Breadboard-1.pdf](Breadboard-1.pdf) schematic without having to open K
 
 ## Supporting Material
 
-* [CALCULATIONS.md](CALCULATIONS.md) discussions how component values were determined.
+* [CALCULATIONS.xlsx](CALCULATIONS.xlsx) contains all of the calculations
+  to determine correct component values and insure all values stay within
+  component specifications.
+
 ### Power Supply
 
 Power from the two rails is fed into a bridge rectifier made up of
@@ -49,9 +52,6 @@ is nearly but not quite continuous DC power with low ripple.  That
 power is split off to drive the motor and functions directly, labeled
 as Vdrive.  A linear regulator U11 is used to generate +5v for the
 micro-processor, and has two support capacitors.
-
-The project requirements for this design are to operate from 6v to 30v
-of input.
 
 ### Micro-controller
 
@@ -72,8 +72,14 @@ The following pins are left in their default locations:
 All other connections were placed to make routing the PCB traces
 simpler.
 
-PIC18F06Q40-I/SS, PIC18F06Q40T-I/SS, and PIC18F06Q40-E/SS are all functionally
-the same and differ only in thermal specifications and packaging.
+PIC18F06Q40T-I/SS, PIC18F06Q40-I/SS, and PIC18F06Q40-E/SS are all
+functionally the same and differ only in thermal specifications and
+packaging.
+
+To input the DCC signal in the correct voltage range a voltage divider
+is formed by R21 & R22.  Because of the wide input range, and to generally
+protect the PIC, D21 is added to insure the input pin is never driven above
++5V.
 
 ### H-Bridge
 
@@ -86,9 +92,9 @@ configuration.  Resistors are placed on the gate inputs of the
 low side to prevent inrush from damaging the micro-controller.
 The high side is driven by two digital transistors.  A digitial
 transistor is a transitor with two built in biasing resistors,
-which saves components in this design.
+which saves components on the board.
 
-In order to calculate BackEMF 3 resistors are added.  At any point
+In order to calculate BackEMF 3 resistors, R35-R37 are added.  At any point
 the motor is turning one of the upper reistors will be tied to
 motor-ground, and one will be tied to motor voltage.  The bottom
 is always tied to ground.  This allows a BackEMF voltage no matter
@@ -104,12 +110,12 @@ This design supports functions F0-F6.
 
 Functions F0F (front headlight) and F0R (rear headlight) are driven directly by the PIC.
 In most designs these are fixed lights on the circuit board, so the exact current draw is
-known in advance.  The resistors are sized to limit the LEDs to approximately 5ma when
+known in advance.  The resistors are sized to limit the LEDs to approximately 3ma when
 driven by the 5v output.
 
 Functions F1-F6 are designed to be connected to external device in a "common anode"
 confuration.  They are driven by 2N7001 MOSFETs to provide the higher current these
-external sources may need.
+external sources may need.  The 2N7001 is rated for 100ma.
 
 Vdrive power is provided as a common anode source.  The MOSFET connects to ground when turned
 on by the micro-processor.  A resistor is provided on the gate of each MOSFET to manage
@@ -149,12 +155,14 @@ Because it is unlikely to be in a locomotive, diagnostic LEDs have
 been added to F1-F6 and also the motor output.
 
 For F0-F6 an appropriate LED + Resistor has been added so that there
-is a visual indicator if a function is on or off.
+is a visual indicator if a function is on or off.  These LED's will
+draw between 1-10ma depending on track voltage.
 
 For the motor output a bi-color Red/Green LED with an appropriate
 resistor has been added across the motor output.  The color Red or
 Green will indicate the motor direction, and the LED will vary in
-intensity from the PWM drive of the motor.
+intensity from the PWM drive of the motor.  These LEDs will draw
+betweenn 1-2ma depending on track voltage.
 
 ### Dummy Load
 
