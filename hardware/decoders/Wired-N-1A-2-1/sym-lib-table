@@ -1,0 +1,4 @@
+(sym_lib_table
+  (lib (name "custom_symbols")(type "KiCad")(uri "/Users/bicknell/Documents/DCC Reference Implementation/DCC-Mobile-Decoder/hardware/kicad_libraries/custom_symbols.kicad_sym")(options "")(descr ""))
+  (lib (name "DCC Project Symbols")(type "KiCad")(uri "/Users/bicknell/Documents/DCC Reference Implementation/DCC-Mobile-Decoder/hardware/kicad_libraries/DCC Project Symbols.kicad_sym")(options "")(descr ""))
+)
