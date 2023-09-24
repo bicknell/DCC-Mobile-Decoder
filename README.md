@@ -11,24 +11,42 @@ could be used in actual locomotives.
 
 ***This project is not yet complete and does not work in its current state.***
 
-Path to a working decoder:
-  - [ ] Complete Hardware reference design - Breadboard-1. (Est 90% complete.)
-    - Need to verify proper hardware is in place to support analog mode.
-    - Need to verify the BackEMF measurement circuit is correct.
-  - [ ] Initial basic software for reference design. (Est 85% complete.)
-    - Add readback and test.
-  - [ ] Initial real decoder design. (Est 75% complete.)
-    - Draft of Wired-N-1A-6-1 has been produced.
-    - Needs further mineaturization (e.g. more DFN components), and possible
-      removal of gate resistors.
-  - [ ] Documentation for above. (Est 60% complete.)
-
 At this point the decoder can be connected to a DCC signal (ops mode) and 
 correctly interprets speed, direction, functions f0-f12, ops mode CV programming,
 and consisting.
 
 Basic motor control has been implemented, but has not been tested with a real
 motor.
+
+Path to a working decoder:
+  - [ ] Complete Hardware reference design - Breadboard-1. (Est 98% complete.)
+  - [ ] Initial basic software for reference design. (Est 85% complete.)
+    - CV's:
+      - Obtain a manufacturer ID number?
+        - Assign version numbers to decoders?
+    - DCC Protocol:
+      - Test/debug service mode programming, implemented but not tested.
+      - Implement the "Factory Test" instruction?  What would it do?
+      - Figure out what to send back for S-9.2.1 2.3.1.3 TTT=111 Decoder Acknowledgement Request
+      - Pulse the motor for readback when in service mode.
+      - Parse 11 bit DCC addresses?  Aren't they accessory decoder only?
+      - Figure out if the Zimo East-West is 2 or 3 byte messages.
+      - Handle S-9.2.1 2.3.6 CCC=110 Feature Expansion Instruction See TN-3-05
+      - Handle S-9.2.3 Appendix B Service Mode Decoder LockA
+    - Hardware Control:
+      - Implement lighting effects.
+      - Implement motor control.
+        - Basic forward/reverse.
+        - BackEMF adjustment.
+        - Analog Mode?
+    - Portability:
+        - What needs to be done to make a common set of software that can be used
+          across multiple decoder designs?
+  - [ ] Initial real decoder design. (Proof of concept drafted.)
+    - Draft of Wired-N-1A-6-1 has been produced.
+    - Needs further mineaturization (e.g. more DFN components), and possible
+      removal of gate resistors.
+  - [ ] Documentation for above. (Est 60% complete.)
 
 ## Layout
 

@@ -733,9 +733,30 @@ void inline dcc_decode(void) {
                                     printf("Set Advanced Addressing, use CV1 short address");
 #endif     
                                 }
-                                // S-9.2.1 2.3.1.2 TTT=111 Decoder Acknowledgement Request
+                                // S-9.2.1 2.3.1.3 TTT=111 Decoder Acknowledgement Request
                             } else if ((dcc_mesg[i] & 0xE) == 0x0E) {
-//TODO
+//TODO Current docs say:
+//TODO   This command is one byte long and has the format of: {instruction bytes} = 00001111
+//TODO   Only an acknowledgment of the command is expected.
+//TODO 
+//TODO Older docs say:
+//TODO   A Decoder shall acknowledge all messages sent to the 253 and 254
+//TODO   address partitions which are specifically addressed to that
+//TODO   Decoder, as follows:
+//TODO 
+//TODO   - For a message that failed checksum validation, the Decoder shall
+//TODO     not transmit in either channel.
+//TODO 
+//TODO   - Any response message specified in the standard acts as an
+//TODO     acknowledgement.
+//TODO 
+//TODO   - For a message in the 254 address partition, if the Decoder does
+//TODO     not have a specific message to transmit, then 8 ACK bytes shall
+//TODO     be transmitted, filling channel 1 and 2.
+//TODO 
+//TODO   - For a message in the 253 address partition, if the Decoder does
+//TODO     not have a specific message to transmit, then 6 ACK bytes shall
+//TODO     be transmitted, filling channel 2.
                             }
                         }
                     }
@@ -963,12 +984,12 @@ void inline dcc_decode(void) {
 /*
  * dcc_performance - Print DCC performance measurements.
  * 
- * This is called every 20ms (TMR0) by the main loop to
+ * This is called every 25ms (TMR0) by the main loop to
  * perform period functions.  These include:
  *   - Checking if exiting service mode is warranted.
  *   - Printing performance statistics once per second.
  */
-uint8_t dcc_per_second = 49;
+uint8_t dcc_per_second = 39;
 uint8_t dcc_good_last = 255;
 void inline dcc_periodic(void) {
     uint16_t address;
@@ -983,11 +1004,11 @@ void inline dcc_periodic(void) {
     }
     dcc_good_last = dcc_good_packets;
     
-    // Timer is every 20 ms, so every 50 timers is once per second.
+    // Timer is every 25 ms, so every 40 timers is once per second.
     // Printing statistics more often is too hard to read.
     --dcc_per_second;
     if (dcc_per_second == 0) {
-        dcc_per_second = 49;
+        dcc_per_second = 39;
 #if DEBUG_PERFORMANCE
     // Print how many times the counter was incremented to give us an idea of idle time.
     printf("Perf: %lu/%u/%u (%u, %u)\r\n", idle_count, dcc_interrupts, dcc_drops,
@@ -1014,6 +1035,7 @@ void inline dcc_periodic(void) {
             my_dcc_functions[12]);
 #endif
     }
+    function_control(); // Perform animations for functions.
 }
 
 /*
