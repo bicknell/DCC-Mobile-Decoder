@@ -1,0 +1,3 @@
+(fp_lib_table
+  (lib (name "DCC Project Footprints")(type "KiCad")(uri "${KIPRJMOD}/../../kicad_libraries/DCC Project Footprints.pretty")(options "")(descr ""))
+)

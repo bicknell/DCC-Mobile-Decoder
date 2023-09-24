@@ -32,3 +32,9 @@ fp-info-cache
 # Exported BOM files
 *.xml
 *.csv
+
+# Mac GUI Caches
+.DS_Store
+.DS_Store?
+.Spotlight-V100
+.Trashes

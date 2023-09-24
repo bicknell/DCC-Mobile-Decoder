@@ -99,7 +99,7 @@ void main(void)
         
     while (1)
     {
-        // TMR0 is a once per second heartbeat we use for status reporting.
+        // TMR0 is a once per 25ms heartbeat we use for status reporting.
         TMR0_Initialize();
         TMR0_StartTimer();
         
@@ -117,7 +117,7 @@ void main(void)
         }
 
         // Control reaches here when TMR0 has gone off.
-        // Perform periodic functions every 20ms.
+        // Perform periodic functions every 25ms.
         dcc_periodic();
     }
 }
