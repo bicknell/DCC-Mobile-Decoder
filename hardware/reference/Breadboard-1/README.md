@@ -5,9 +5,12 @@
 The Breadboard-1 design was created to make development of software as
 simple as possible.  The design goals were:
 
+* Serve as a "reference design" for a decoder such that other designs
+  could largely be done by omitting unnecessary elements and selecting
+  new components.
 * Fit a standard 400 or 830 tie point breadboard.
 * Have a connector for a PICKIT 4 or similar ICSP programmer.
-* Operate at a modest power level (generally similar to N sccale).
+* Operate over the full range of NMRA voltages to be scale independent.
 * Have an easy to understand schmatic, suitable for teaching.
 * Have an easy to understand PCB, suitable for teaching.
 * Use low cost components.
@@ -15,53 +18,45 @@ simple as possible.  The design goals were:
 
 ## 3D Render
 
-Actual size: 2" wide x 2.75" tall (not counting pins at top).
+Actual size: 2" wide x 3" tall (not counting headers at top).
 
 ![Breadboard-1 3D Render](Breadboard-1.jpg)
 
 ## Intended Use Case
 
-It is expected that most users would plug this device into a 400 tie point bread board,
-connect an ICSP programmer like a PICKIT4, and power RL and RR from a DCC command station.
+It is expected that most users will connect the ICSP and Serial headers
+to use the board for software development activities.  Users who do not 
+need external components (e.g. motors, or external function devices) can
+simply solder power wires to the RL and RR inputs.  Users who want to
+connect external devices would likely populate J1 and J2 and plug the
+board into a standard 400 or 830 point breadboard.  The exposed connections
+allow testing things like grain-of-wheat bulbs for lighting effects.
 
-In this configuration the board can be used for software development purposes.  It will
-allow software to be loaded onto the PIC, tested against a real DCC signal, and provide
-visual confirmation of the actions being taken.
+Although this decoder is not specifically intended to go in a locomotive
+it could be installed in one.  This may be particularly useful when developing
+motor control code.
 
-Functions are exposed to the breadboard so that alternative devices (e.g. grain of wheat
-bulbs, alternative color/shape/intensity LEDs) can be connected and tested.
+## Schematic
 
-The motor is exposed to the breadboard so that an actual motor can be connected to test
-motor drive logic.
+View the [Breadboard-1.pdf](Breadboard-1.pdf) schematic without
+having to open KiCad!
 
-## Schematic Walkthrough
-
-View the [Breadboard-1.pdf](Breadboard-1.pdf) schematic without having to open KiCad!
-
-## Supporting Material
-
-* [CALCULATIONS.xlsx](CALCULATIONS.xlsx) contains all of the calculations
-  to determine correct component values and insure all values stay within
-  component specifications.
+The document [CALCULATIONS.xlsx](CALCULATIONS.xlsx) contains a worksheet
+for each schematic block with all of the relevant calculations.
 
 ### Power Supply
 
-Power from the two rails is fed into a bridge rectifier made up of
-four discrete diodes D11-D14.  As DCC is a square wave, the output
-is nearly but not quite continuous DC power with low ripple.  That
-power is split off to drive the motor and functions directly, labeled
-as Vdrive.  A linear regulator U11 is used to generate +5v for the
-micro-processor, and has two support capacitors.
+This block takes power from the rails and rectifies it into a 
+Vdrive DC source that can be used to drive the motor.  Then a
+linear regulator is used to provide a stable Vdd for the micro-processor.
 
-### Micro-controller
+### Processor
 
 A PIC18F06Q40 processor is used in this design.  PIC processors
-require minimal support components.  C21 is a local bypass/decoupling
-capacitor that is placed closed to the power pins.  C23 and R23
-form a hold up circuit for MCLR which must be kept high during
-normal operation.  If MCLR drops, the chip will reset.  R24 is
-recommended by the datasheet to prevent chip damage when C23
-discharges.
+require minimal support components.  It needs only one decoupling
+capacitor and a circuit to hold up MCLR when running.  Due to the
+expected repeated programming the MCLR hold up includes a diode
+to protect the circuit from repeated high programming voltages.
 
 The following pins are left in their default locations:
 
@@ -76,10 +71,13 @@ PIC18F06Q40T-I/SS, PIC18F06Q40-I/SS, and PIC18F06Q40-E/SS are all
 functionally the same and differ only in thermal specifications and
 packaging.
 
-To input the DCC signal in the correct voltage range a voltage divider
-is formed by R21 & R22.  Because of the wide input range, and to generally
-protect the PIC, D21 is added to insure the input pin is never driven above
-+5V.
+### DCC Signal
+
+To input the DCC signal the voltage is first stepped down by R31/R32
+as a voltage divider.  This puts the signal inside the gate voltage
+range of the 2N7002 MOSFET, which then turns on/off the logic level
+voltage.  This circuit depends on the weak pull up being enabled
+on the input pin of the processor.
 
 ### H-Bridge
 
@@ -94,33 +92,50 @@ The high side is driven by two digital transistors.  A digitial
 transistor is a transitor with two built in biasing resistors,
 which saves components on the board.
 
-In order to calculate BackEMF 3 resistors, R35-R37 are added.  At any point
-the motor is turning one of the upper reistors will be tied to
-motor-ground, and one will be tied to motor voltage.  The bottom
-is always tied to ground.  This allows a BackEMF voltage no matter
-which way the motor is spinning.  The resulting voltage goes into
-an analog pin configured in ADC mode so the voltage can be measured.
+In order to calculate BackEMF 3 resistors, R53, R54, and R57 are
+added.  At any point the motor is turning one of the upper reistors
+will be tied to motor-ground, and one will be tied to motor voltage.
+The bottom is always tied to ground.  This allows a BackEMF voltage
+no matter which way the motor is spinning.  The resulting voltage
+goes into an analog pin configured in ADC mode so the voltage can
+be measured.
 
-Capacitors C31 and C32 are added to prevent noise from the motor
+Capacitors C51 and C52 are added to prevent noise from the motor
 backfeeding into the Vdrive power that might affect other components.
 
-### Functions
+### F0F-F0R
 
-This design supports functions F0-F6.
+Functions F0F (front headlight) and F0R (rear headlight) are driven
+directly by the PIC.  In most designs these are fixed lights on the
+circuit board, so the exact current draw is known in advance.  This
+configuration also means the light intensity is not determined by
+track voltage.
 
-Functions F0F (front headlight) and F0R (rear headlight) are driven directly by the PIC.
-In most designs these are fixed lights on the circuit board, so the exact current draw is
-known in advance.  The resistors are sized to limit the LEDs to approximately 3ma when
-driven by the 5v output.
+### Function Outputs
 
-Functions F1-F6 are designed to be connected to external device in a "common anode"
-confuration.  They are driven by 2N7001 MOSFETs to provide the higher current these
-external sources may need.  The 2N7001 is rated for 100ma.
+This design supports functions F1-F6.  Typically decoders support
+2 or 4 functions in hardware.
 
-Vdrive power is provided as a common anode source.  The MOSFET connects to ground when turned
-on by the micro-processor.  A resistor is provided on the gate of each MOSFET to manage
-inrush current.  An LED with resistor sized for track power are also installed so the
-user needs no external lights.
+Functions F1-F6 are designed to be connected to external device in
+a "common anode" (positive) confuration.  They are driven by 2N7001
+MOSFETs to provide the higher current these external sources may
+need.  The 2N7001 is rated for 100ma.
+
+Vdrive power is provided as a common anode source.  The MOSFET
+connects to ground when turned on by the micro-processor.  A resistor
+is provided on the gate of each MOSFET to manage inrush current.
+
+### Diagnostic LEDs
+
+An LED with resistor sized for track power are installed on F1-F6
+so the user needs no external lights.  These would not be present
+on a real decoder, and are in this design solely to assist with
+the software development process.
+
+For the motor output a bi-color Red/Green LED with an appropriate
+resistor has been added across the motor output.  The color Red or
+Green will indicate the motor direction, and the LED will vary in
+intensity from the PWM drive of the motor.
 
 ### External Connectivity
 
@@ -147,31 +162,16 @@ A 7 pin header (optional) is also provided for connecting an oscilloscope.
 The P1A-P1D motor driver outputs, DCC signal in, and BackEMF voltage are
 all exposed on pins to make diagnostics easier.
 
-### Diagnostic LEDs
-
-This decoder is not designed to go into a locomotive.  It's purpose
-is to teach about DCC, and to enable rapid software development.
-Because it is unlikely to be in a locomotive, diagnostic LEDs have
-been added to F1-F6 and also the motor output.
-
-For F0-F6 an appropriate LED + Resistor has been added so that there
-is a visual indicator if a function is on or off.  These LED's will
-draw between 1-10ma depending on track voltage.
-
-For the motor output a bi-color Red/Green LED with an appropriate
-resistor has been added across the motor output.  The color Red or
-Green will indicate the motor direction, and the LED will vary in
-intensity from the PWM drive of the motor.  These LEDs will draw
-betweenn 1-2ma depending on track voltage.
-
 ### Dummy Load
 
-When JP61 is installed a 100 Ohm resistor is connected to the motor outputs.  This
-enables "readback" functionality without having a motor connected, or generating a
-load on a command station when increasing the speed without having a motor attached.
+When JP61 is installed a 100 Ohm resistor is connected to the motor
+outputs.  This enables "readback" functionality without having a
+motor connected, or generating a load on a command station when
+increasing the speed without having a motor attached.
 
-**WARNING** If the jumper is enabled, the voltge high enough, and the motor speed
-high enough the resistor will get very hot and/or burn out.  This is intended to
-enable read-back in service mode only, and not as a dummy load for continuous
-operation.  Recommend that jumper JP61 only be installed when performing service
-mode work.
+**WARNING** If the jumper is enabled, the voltge high enough, and
+the motor speed high enough the resistor will get very hot and/or
+burn out.  This is intended to enable read-back in service mode
+only, and not as a dummy load for continuous operation.  Recommend
+that jumper JP61 only be installed when performing service mode
+work.
