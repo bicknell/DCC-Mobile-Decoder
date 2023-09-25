@@ -11,9 +11,9 @@ Breadboard-1 reference design.
 
 ## 3D Render
 
-Actual size 9mm x 25mm:
+Actual size 9mm x 20mm:
 
-![Front](Wired-N-1A-2-1-front.jpg) ![Back](Wired-N-1A-2-1-back.jpg)
+![Board](Wired-N-1A-2-1.jpg)
 
 ## Intended Use Case
 
@@ -21,9 +21,11 @@ Used for any hard wired N scale application, from locomotives that do
 not support drop in decoders, to passenger car and caboose lighting
 operations.
 
-## Supporting Material
+## Schematic
 
-* [CALCULATIONS.md](CALCULATIONS.md) discussions how component values were determined.
+View the schematic: [Wired-N-1A-2-1.pdf](Wired-N-1A-2-1.pdf)
+
+Supporting [CALCULATIONS.md](CALCULATIONS.md) discussions how component values were determined.
 
 ## Schematic Walkthrough
 
