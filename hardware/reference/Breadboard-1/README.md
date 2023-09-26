@@ -50,6 +50,11 @@ This block takes power from the rails and rectifies it into a
 Vdrive DC source that can be used to drive the motor.  Then a
 linear regulator is used to provide a stable Vdd for the micro-processor.
 
+A location is left for a user-installed C11 "super capacitor".  The capacitor
+must be rated for at least 30V, and should not exceed 1000uF (1F).  The capacitor
+may be up to 10mm in diameter, and have 2.5mm or 5mm lead spacing.  Recommend
+a 50V 470uF for most applications.
+
 ### Processor
 
 A PIC18F06Q40 processor is used in this design.  PIC processors
