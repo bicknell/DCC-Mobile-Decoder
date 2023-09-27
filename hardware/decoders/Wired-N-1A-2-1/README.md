@@ -6,7 +6,7 @@ The Wired-N-1A-2-1 design is a basic 1A N-Scale decoder based off the
 Breadboard-1 reference design.
 
 * 1A Capacity
-* 6 Functions
+* 2 Functions (FOF, FOR)
 * ICSP programming exposed via pads.
 
 ## 3D Render
@@ -17,9 +17,9 @@ Actual size 9mm x 20mm:
 
 ## Intended Use Case
 
-Used for any hard wired N scale application, from locomotives that do 
-not support drop in decoders, to passenger car and caboose lighting
-operations.
+Used for any hard wired N/Z scale application, from locomotives
+that do not support drop in decoders, to passenger car and caboose
+lighting operations.
 
 ## Schematic
 
