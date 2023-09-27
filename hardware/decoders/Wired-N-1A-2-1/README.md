@@ -8,10 +8,11 @@ Breadboard-1 reference design.
 * 1A Capacity
 * 2 Functions (FOF, FOR)
 * ICSP programming exposed via pads.
+* Components on top side only enabling cheap fabrication.
 
 ## 3D Render
 
-Actual size 9mm x 20mm:
+Actual size 9mm x 18mm:
 
 ![Board](Wired-N-1A-2-1.jpg)
 
