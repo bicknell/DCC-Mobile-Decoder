@@ -6,7 +6,7 @@ The Wired-N-1A-6-1 design is a basic 1A N-Scale decoder based off the
 Breadboard-1 reference design.
 
 * 1A Capacity
-* 6 Functions
+* 8 Functions (F0F, F0R, F1-F6)
 * ICSP programming exposed via pads.
 
 ## 3D Render
