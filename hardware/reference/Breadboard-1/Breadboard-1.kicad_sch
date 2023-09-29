@@ -3583,7 +3583,7 @@
     (property "MPN" "DNP" (id 6) (at 59.69 36.83 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Specification" "Location for user-supplied \"super capacitor\", up to D10 and Pitch of 2.5 or 5mm." (id 7) (at 59.69 36.83 0)
+    (property "Specification" "Location for user-supplied super capacitor up to D10 and Pitch of 2.5 or 5mm." (id 7) (at 59.69 36.83 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid 3c9546d9-ed46-4965-8bb9-16764ff3aa29))
