@@ -396,9 +396,7 @@
         "microvia_diameter": 0.3,
         "microvia_drill": 0.1,
         "name": "Ground",
-        "nets": [
-          "GND"
-        ],
+        "nets": [],
         "pcb_color": "rgba(0, 0, 0, 0.000)",
         "schematic_color": "rgba(0, 0, 0, 0.000)",
         "track_width": 0.508,
@@ -424,7 +422,7 @@
     "page_layout_descr_file": ""
   },
   "schematic": {
-    "annotate_start_num": 80,
+    "annotate_start_num": 50,
     "drawing": {
       "default_line_thickness": 6.0,
       "default_text_size": 50.0,
