@@ -48,7 +48,7 @@ Names will be made up of the following components:
 * Amperage
   - To the nearest 0.1A
 * Functions
-  - Number of functions supported not including F0.  E.g. F1-F6 = 6
+  - Number of functions supported including F0F/F0R.  E.g. F0F,F0R,F1-F6 = 8
 * Locomotive - If designed to fit a specific model, otherwise omitted.
 * Iterator - Starts at 1, and incremented if new designs are added.
 
