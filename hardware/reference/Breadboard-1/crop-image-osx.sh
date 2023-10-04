@@ -1,4 +1,4 @@
-#!/usr/bin
+#!/bin/bash
 
 # sips - scriptable image processing system
 # -Z 1600 resizes the entire image to a max of 1600 on a side.
