@@ -24,17 +24,17 @@ Features:
   - [ ] Speed dependent function behavior.
   - [X] Direction dependent function behavior.
   - [X] Headlight dependent functions.
-- [\] Lighting effects. (Partially implemented.)
+- [X] Lighting effects.
   - Tradenames:
     - `Digitrax FX`
-      - Ditch Lights
-      - Mars Lights
-      - Gyra Lights
-      - Rotary Beacon
-      - Single Pulse Strobe Lights
-      - Double Pulse Strobe Lights
-      - Random Flicker / Firebox
-      - Rule 17 Dimming
+      - [ ] Ditch Lights
+      - [ ] Mars Lights
+      - [ ] Gyra Lights
+      - [ ] Rotary Beacon
+      - [X] Single Pulse Strobe Lights
+      - [X] Double Pulse Strobe Lights
+      - [ ] Random Flicker / Firebox
+      - [ ] Rule 17 Dimming
 - [ ] Dimmable Function Outputs
 - [ ] Outputs can be configured for LED or Incandescent bulbs.
   - LEDs are instant on-off, incandescents fade off.
