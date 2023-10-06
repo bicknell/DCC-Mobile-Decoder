@@ -65,7 +65,7 @@
 #include "cv.h"
 #include "dcc.h"
 #include "debug.h"
-
+#include "hardware.h"
 
 /*
  *                       Main application
@@ -75,14 +75,15 @@ void main(void)
     // Initialize the device
     SYSTEM_Initialize();
 
-    // Drive unused pins low, per the data sheet.
-    IO_Unused1_SetLow();
-    
-    // TMR2 is hooked to the DCC input pin, and calls the ISR.
-    TMR2_SetInterruptHandler(DCC_ISR);
+    // Call our initalization function in hardware.c to be sure the hardware
+    // is configured correctly.
+    hardware_initialize();
 
 #if DEBUG_STATUS
-    printf("\r\nSystem Boot\r\n");
+    printf("\r\nCompiled on %s at %s using version %0d with flags 0x%04X.\r\n",
+           __DATE__, __TIME__, __XC8_VERSION, __OPTIM_FLAGS);
+    printf("STATUS = 0x%04x, PCON0 = 0x%04X, PCON1 = 0x%04X.\r\n",
+            STATUS, PCON0, PCON1);
 #endif
     
     // Make sure the EEPROM data has been configured.
@@ -119,6 +120,7 @@ void main(void)
         // Control reaches here when TMR0 has gone off.
         // Perform periodic functions every 25ms.
         dcc_periodic();
+        function_periodic(); // Perform animations for functions.
     }
 }
 /**

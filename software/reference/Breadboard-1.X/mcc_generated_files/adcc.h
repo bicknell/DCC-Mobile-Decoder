@@ -88,7 +88,7 @@ typedef __uint24 uint24_t;
 
 typedef enum
 {
-    BackEMF =  0x5,
+    IO_BACKEMF =  0x5,
     channel_DAC2 =  0x3A,
     channel_VSS =  0x3B,
     channel_Temp =  0x3C,

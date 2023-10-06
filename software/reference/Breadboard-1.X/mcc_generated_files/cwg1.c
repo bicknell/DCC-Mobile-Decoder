@@ -62,11 +62,11 @@ void CWG1_Initialize(void)
 	// CWG1POLA non inverted; CWG1POLC non inverted; CWG1POLB non inverted; CWG1POLD non inverted; 
 	CWG1CON1 = 0x00;
 
-	// CWG1DBR 1 to 2; 
-	CWG1DBR = 0x01;
+	// CWG1DBR 9 to 10; 
+	CWG1DBR = 0x09;
 
-	// CWG1DBF 1 to 2; 
-	CWG1DBF = 0x01;
+	// CWG1DBF 9 to 10; 
+	CWG1DBF = 0x09;
 
 	// SHUTDOWN No Auto-shutdown; REN disabled; CWG1LSBD tri-stated; CWG1LSAC tri-stated; 
 	CWG1AS0 = 0x14;

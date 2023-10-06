@@ -10,13 +10,8 @@
 
 /* DESCRIPTION
  *
- * This file contains routines to manipulate the motor, functions, and other
- * hardware specific outputs.
- * 
- * Assumptions:
- *     - In MCC pin manager, functions have been named IO_F0R, IO_F0F, IO_F1 - IO_F6
- *     - In MCC CWG has been enabeld and connected to the 4 H-Bridge MOSFETS.
- *     - In MCC PWM1 has been configured as the input for CWG.
+ * This file contains routines to control function behavior, including the
+ * function effects.
  * 
  */
 
@@ -108,7 +103,7 @@ void function_effects(uint8_t i) {
      */
     if (dcc_functions[i] &&                                      // User has requested on AND
         (((cv_effects[i] & 0x80) == 0) ||                        // (not directional OR
-         (my_dcc_direction == ((cv_effects[i] & 0x40) >> 6))) && //  direction matches) AND
+         (dcc_direction == ((cv_effects[i] & 0x40) >> 6))) && //  direction matches) AND
         (((cv_effects[i] & 0x20) == 0) ||                        // (always on OR
             dcc_functions[0])                                    //  F0 is also on)
        ) { 
@@ -122,12 +117,12 @@ void function_effects(uint8_t i) {
 }
 
 /*
- * function_control sets the output functions as requested from the DCC packet.
+ * function_periodic sets the output functions as requested from the DCC packet.
  *
  * At the moment we support no lighting effects so this is a very simple function.
  *
  */
-void function_control(void) {
+void function_periodic(void) {
     uint8_t i;
 
     // Functions 0 to 6 are effect capable.

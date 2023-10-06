@@ -27,36 +27,30 @@ extern "C" {
 #endif
 
 #include "debug.h"
+#include "functions.h"
 
-    
-#define DCC_FORWARD   0
-#define DCC_REVERSE   1
+#define DCC_FORWARD   0     // dcc_direction, dcc_not, dcc_consist_ndot
+#define DCC_REVERSE   1     // dcc_direction, dcc_not, dcc_consist_ndot
     
 /*
  * Function prototypes for our exposed functions.
  */
 void DCC_ISR(void);
 void dcc_initialize(void);
-void inline dcc_decode(void);
-void inline dcc_periodic(void);
-void inline dcc_idle(void);
+void dcc_decode(void);
+void dcc_periodic(void);
+void dcc_idle(void);
 
 /*
  * Exposed global variables.
  * 
  * TODO: Reduce this list, use proper accessing functions.
  */
-uint16_t            my_dcc_address        = 0;    // Configured DCC address
-uint8_t             my_dcc_ndot           = 0;    // NDOT
-uint16_t            my_dcc_consist        = 0;    // Configured consist address
-uint8_t             my_dcc_consist_ndot   = 0;    // NDOT in consist.
-uint8_t             my_dcc_functions[13]  = {0};  // DCC Packet Function State
-uint8_t             my_dcc_effects[13]    = {0};  // Effects cached from CV's.
-uint8_t             my_dcc_speedsteps     = 0;    // DCC Packet Speed Steps
-uint8_t             my_dcc_speed          = 0;    // DCC Packet Speed
-uint8_t             my_dcc_direction      = 0;    // DCC Packet Direction, 0 == forward, 1 == reverse
-char                dcc_mesg[6]           = {0};  // DCC Messages can't be more than 6 bytes per S-9.2.1
-uint8_t             dcc_len               = 0;    // Length of the DCC message.
+uint8_t             dcc_ndot              = 0;    // NDOT
+uint16_t            dcc_consist           = 0;    // Configured consist address
+uint8_t             dcc_consist_ndot      = 0;    // NDOT in consist.
+uint8_t             dcc_functions[FUNCTION_MAX]  = {0};  // DCC Packet Function State
+uint8_t             dcc_direction         = 0;    // DCC Packet Direction, 0 == forward, 1 == reverse
 volatile uint8_t    dcc_ready             = 0;    // DCC Message is ready.
 
 #ifdef	__cplusplus

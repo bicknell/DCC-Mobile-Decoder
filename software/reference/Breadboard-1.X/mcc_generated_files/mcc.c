@@ -58,6 +58,7 @@ void SYSTEM_Initialize(void)
     TMR0_Initialize();
     CWG1_Initialize();
     UART1_Initialize();
+    PWM2_16BIT_Initialize();
     PWM1_16BIT_Initialize();
 }
 

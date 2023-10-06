@@ -1,23 +1,17 @@
-/*
+/* 
+ * File:   hardware.c
+ * Author: bicknell
+ * 
+ * Contains mapping to a specific hardware layout.
+ *
  * This code is subject to the
  * 
  * Creative Commons Attribution-NonCommercial 4.0 International Public License
  * 
  * Please see https://github.com/bicknell/DCC-Mobile-Decoder/LICENSE for full
  * license terms.
- *
- */
-
-/* DESCRIPTION
- *
- * This file contains routines to manipulate the motor, functions, and other
- * hardware specific outputs.
  * 
- * Assumptions:
- *     - In MCC pin manager, functions have been named IO_F0R, IO_F0F, IO_F1 - IO_F6
- *     - In MCC CWG has been enabeld and connected to the 4 H-Bridge MOSFETS.
- *     - In MCC PWM1 has been configured as the input for CWG.
- * 
+ * Created on October 5, 2023, 7:11 AM
  */
 
 #include <stdint.h>
@@ -26,200 +20,158 @@
 #include "debug.h"
 #include "hardware.h"
 
-/*
- * Variables associated with motor_control, motor_pwm
- */
-static uint8_t motor_speed     = 0;   // 0-255 speed of motor
-static uint8_t motor_direction = 0;   // 0 = forward, 1 = reverse
-
-// Effects bit array.  
-// Each row is an indexable effect.
-// Each column is a bit array, 4 bytes per second, 2 seconds of pattern total.
-static uint8_t effects[10][8] = {
-    { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF },       // Row 0: Continuous On, default
-    { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF },       // Row 1: Mars Light
-    { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF },       // Row 2: Random Flicker
-    { 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00 },       // Row 3: Flashing Headlight
-    { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03 },       // Row 4: Single Pulse Strobe
-    { 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x03 },       // Row 5: Double Pulse Strobe
-    { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF },       // Row 6: Rotary Beacon
-    { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF },       // Row 7: Gyralite
-    { 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00 },       // Row 8: Ditch Light Left
-    { 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF },       // Row 9: Ditch Light Right
-};
-
-/*
- * motor_control is called when we get a DCC speed/direction message
- */
-void motor_control(uint8_t speedsteps, uint8_t speed, uint8_t direction) {    
-    if (speedsteps == 128) {
-        if (speed == 1) {
-            // In 128SS mode, a speed of 1 is ESTOP.  Treat the same as stop.
-            speed = 0;
-        }
-
-        // We don't implement any speed tables yet, so just scale 128SS into 
-        // the 256 byte actual speed.
-        motor_speed = (uint8_t)(speed << 1);
-    } else if (speedsteps == 28) {
-        // Technically this makes top speed 252/255, oh well.
-        motor_speed = speed * 9;
-    } else if (speedsteps == 14) {
-        // Technically this makes top speed 252/255, oh well.
-        motor_speed = speed * 9;
-    }
-
-    PWM1_16BIT_SetSlice1Output2DutyCycleRegister(motor_speed);
-    PWM1_16BIT_LoadBufferRegisters();
-
-
-    // Are we in a consist?
-    if (my_dcc_consist) {
-        motor_direction = direction ^ (my_dcc_consist_ndot ^ my_dcc_ndot);
-    // Not in a consist.
-    } else {
-        motor_direction = direction ^ my_dcc_ndot;
-    }
- 
-    // Toggling the mode[0] bit of CWG1CON1 changes direction of the full
-    // bridge output.
-    // Reverse
-    if (motor_direction) {
-        CWG1CON1 = CWG1CON1 | 0x01;
-    // Forward
-    } else {
-        CWG1CON1 = CWG1CON1 & 0xFE;
-    }
-#if DEBUG_HW_MOTOR
-    printf("Motor PWM %d/255 direction %c.\r\n", motor_speed, motor_direction ? 'R' : 'F');
-#endif
-}
-
-/*
- * function_control sets the output functions as requested from the DCC packet.
- *
- * At the moment we support no lighting effects so this is a very simple function.
- *
- */
-void function_control(void) {
-    static uint8_t idx = 0;
-    static uint8_t pos = 0x80;
-    
-    // Functions in the forward direction.
-    if (my_dcc_direction == 0) {             // Group by direction, this is forward
-        if (my_dcc_functions[0]) {           // User wants F0 On
-            if (my_dcc_effects[0] & 0x80) { // Effect is in the forward direction
-                if (effects[my_dcc_effects[0] & 0x3F][idx] & pos) { IO_F0F_SetHigh(); } else { IO_F0F_SetLow(); };
-                IO_F0R_SetLow();
-            }
+int f0_output(int x) {
+    /*
+     * F0F / F0R are always direction dependent.
+     */
+    if (dcc_direction == DCC_FORWARD) {
+        if (x) {
+            IO_F0F_SetHigh();
         } else {
             IO_F0F_SetLow();
         }
-        if (my_dcc_functions[1]) {           // User wants F1 On
-            if (my_dcc_effects[1] & 0x80) { // Effect is in the forward direction
-                if (effects[my_dcc_effects[1] & 0x3F][idx] & pos) { IO_F1_SetHigh(); } else { IO_F1_SetLow(); };
-            }
-        } else {
-            IO_F1_SetLow();
-        }
-        if (my_dcc_functions[2]) {           // User wants F2 On
-            if (my_dcc_effects[2] & 0x80) { // Effect is in the forward direction
-                if (effects[my_dcc_effects[2] & 0x3F][idx] & pos) { IO_F2_SetHigh(); } else { IO_F2_SetLow(); };
-            }
-        } else {
-            IO_F2_SetLow();
-        }
-        if (my_dcc_functions[3]) {           // User wants F3 On
-            if (my_dcc_effects[3] & 0x80) { // Effect is in the forward direction
-                if (effects[my_dcc_effects[3] & 0x3F][idx] & pos) { IO_F3_SetHigh(); } else { IO_F3_SetLow(); };
-            }
-        } else {
-            IO_F3_SetLow();
-        }
-        if (my_dcc_functions[4]) {           // User wants F4 On
-            if (my_dcc_effects[4] & 0x80) { // Effect is in the forward direction
-                if (effects[my_dcc_effects[4] & 0x3F][idx] & pos) { IO_F4_SetHigh(); } else { IO_F4_SetLow(); };
-            }
-        } else {
-            IO_F4_SetLow();
-        }
-        if (my_dcc_functions[5]) {           // User wants F5 On
-            if (my_dcc_effects[5] & 0x80) { // Effect is in the forward direction
-                if (effects[my_dcc_effects[5] & 0x3F][idx] & pos) { IO_F5_SetHigh(); } else { IO_F5_SetLow(); };
-            }
-        } else {
-            IO_F5_SetLow();
-        }
-        if (my_dcc_functions[6]) {           // User wants F6 On
-            if (my_dcc_effects[6] & 0x80) { // Effect is in the forward direction
-                if (effects[my_dcc_effects[6] & 0x3F][idx] & pos) { IO_F6_SetHigh(); } else { IO_F6_SetLow(); };
-            }
-        } else {
-            IO_F6_SetLow();
-        }
-
-    // Functions in the reverse direction.
+        IO_F0R_SetLow();
     } else {
-         if (my_dcc_functions[0]) {           // User wants F0 On
-            if (my_dcc_effects[0] & 0x40) { // Effect is in the forward direction
-                if (effects[my_dcc_effects[0] & 0x3F][idx] & pos) { IO_F0R_SetHigh(); } else { IO_F0R_SetLow(); };
-                IO_F0F_SetLow();
-            }
+        if (x) {
+            IO_F0R_SetHigh();
         } else {
             IO_F0R_SetLow();
         }
-        if (my_dcc_functions[1]) {           // User wants F1 On
-            if (my_dcc_effects[1] & 0x40) { // Effect is in the forward direction
-                if (effects[my_dcc_effects[1] & 0x3F][idx] & pos) { IO_F1_SetHigh(); } else { IO_F1_SetLow(); };
-            }
-        } else {
-            IO_F1_SetLow();
-        }
-        if (my_dcc_functions[2]) {           // User wants F2 On
-            if (my_dcc_effects[2] & 0x40) { // Effect is in the forward direction
-                if (effects[my_dcc_effects[2] & 0x3F][idx] & pos) { IO_F2_SetHigh(); } else { IO_F2_SetLow(); };
-            }
-        } else {
-            IO_F2_SetLow();
-        }
-        if (my_dcc_functions[3]) {           // User wants F3 On
-            if (my_dcc_effects[3] & 0x40) { // Effect is in the forward direction
-                if (effects[my_dcc_effects[3] & 0x3F][idx] & pos) { IO_F3_SetHigh(); } else { IO_F3_SetLow(); };
-            }
-        } else {
-            IO_F3_SetLow();
-        }
-        if (my_dcc_functions[4]) {           // User wants F4 On
-            if (my_dcc_effects[4] & 0x40) { // Effect is in the forward direction
-                if (effects[my_dcc_effects[4] & 0x3F][idx] & pos) { IO_F4_SetHigh(); } else { IO_F4_SetLow(); };
-            }
-        } else {
-            IO_F4_SetLow();
-        }
-        if (my_dcc_functions[5]) {           // User wants F5 On
-            if (my_dcc_effects[5] & 0x40) { // Effect is in the forward direction
-                if (effects[my_dcc_effects[5] & 0x3F][idx] & pos) { IO_F5_SetHigh(); } else { IO_F5_SetLow(); };
-            }
-        } else {
-            IO_F5_SetLow();
-        }
-        if (my_dcc_functions[6]) {           // User wants F6 On
-            if (my_dcc_effects[6] & 0x40) { // Effect is in the forward direction
-                if (effects[my_dcc_effects[6] & 0x3F][idx] & pos) { IO_F6_SetHigh(); } else { IO_F6_SetLow(); };
-            }
-        } else {
-            IO_F6_SetLow();
-        }
+        IO_F0F_SetLow();
     }
-    
-    // Increment indexes.
-    if (pos == 1) {
-        pos = 0x80;
-        idx++;
-        if (idx > 7) { // MAGIC
-            idx = 0;
-        }
+    return 0;
+}
+
+
+int f1_output(int x) {
+#ifdef IO_F1_PORT
+    if (x) {
+        IO_F1_SetHigh();
     } else {
-        pos = pos >> 1;
+        IO_F1_SetLow();
     }
+#endif
+    return 0;
+}
+
+int f2_output(int x) {
+#ifdef IO_F2_PORT
+    if (x) {
+        IO_F2_SetHigh();
+    } else {
+        IO_F2_SetLow();
+    }
+#endif
+    return 0;
+}
+
+int f3_output(int x) {
+#ifdef IO_F3_PORT
+    if (x) {
+        IO_F3_SetHigh();
+    } else {
+        IO_F3_SetLow();
+    }
+#endif
+    return 0;
+}
+
+int f4_output(int x) {
+#ifdef IO_F4_PORT
+    if (x) {
+        IO_F4_SetHigh();
+    } else {
+        IO_F4_SetLow();
+    }
+#endif
+    return 0;
+}
+
+int f5_output(int x) {
+#ifdef IO_F5_PORT
+    if (x) {
+        IO_F5_SetHigh();
+    } else {
+        IO_F5_SetLow();
+    }
+#endif
+    return 0;
+}
+
+int f6_output(int x) {
+#ifdef IO_F6_PORT
+    if (x) {
+        IO_F6_SetHigh();
+    } else {
+        IO_F6_SetLow();
+    }
+#endif
+    return 0;
+}
+
+int dummy_output(int x) {
+    return 0;
+}
+
+void hardware_initialize(void) {
+
+/*
+ * Set all functions to off.
+ */
+    IO_F0F_SetLow();
+    IO_F0R_SetLow();
+    IO_F1_SetLow();
+    IO_F2_SetLow();
+    IO_F3_SetLow();
+    IO_F4_SetLow();
+    IO_F5_SetLow();
+    IO_F6_SetLow();
+    
+/*
+ * Unused pins are set to output and driven low per Microchip's 
+ * recommended practices.
+ */
+#ifdef IO_UNUSED1
+    IO_UNUSED1_SetLow();
+#endif
+#ifdef IO_UNUSED2
+    IO_UNUSED2_SetLow();
+#endif
+#ifdef IO_UNUSED3
+    IO_UNUSED3_SetLow();
+#endif
+#ifdef IO_UNUSED4
+    IO_UNUSED4_SetLow();
+#endif
+#ifdef IO_UNUSED5
+    IO_UNUSED5_SetLow();
+#endif
+#ifdef IO_UNUSED6
+    IO_UNUSED6_SetLow();
+#endif
+#ifdef IO_UNUSED7
+    IO_UNUSED7_SetLow();
+#endif
+#ifdef IO_UNUSED8
+    IO_UNUSED8_SetLow();
+#endif
+#ifdef IO_UNUSED9
+    IO_UNUSED9_SetLow();
+#endif
+        
+    // TMR2 is hooked to the DCC input pin, and calls the ISR.
+    TMR2_SetInterruptHandler(DCC_ISR);
+    
+    // Initialize output locations:
+    for (int i = 0;i < FUNCTION_MAX;i++) {
+        hardware_outputs[i] = dummy_output;
+    }
+    // TODO: Handle Function Mapping
+    hardware_outputs[0] = f0_output;
+    hardware_outputs[1] = f1_output;
+    hardware_outputs[2] = f2_output;
+    hardware_outputs[3] = f3_output;
+    hardware_outputs[4] = f4_output;
+    hardware_outputs[5] = f5_output;
+    hardware_outputs[6] = f6_output;
 }

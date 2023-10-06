@@ -24,13 +24,12 @@
 #include <stdint.h>
 #include "mcc_generated_files/mcc.h"
 #include "cv.h"
-#include "dcc.h"
 #include "debug.h"
 
 /*
- * A list of CV's that are read only.
+ * Locally scoped variables.
  */
-static uint8_t cv_read_only[] = {
+static uint8_t cv_read_only[] = {   // A list of CV's that are read only.
     CV_MANUFACTURER_VERSION,
     CV_MANUFACTURER_ID,
     CV_E_MANUFACTURER_ID_LOW,
@@ -40,6 +39,12 @@ static uint8_t cv_read_only[] = {
     CV_E_MANUFACTURER_VERSION_C,
     0
 };
+
+/*
+ * Prototypes for local functions.
+ */
+void    cv_factory_defaults(void);
+void    cv_reset_next_time(void);
 
 /*
  * cv_write - write a CV value to EEPROM
@@ -148,20 +153,20 @@ void cv_factory_defaults(void) {
     DATAEE_WriteByte(CV_ERROR_INFORMATION, 0);
     DATAEE_WriteByte(CV_INDEX_HIGH_BYTE, 0);
     DATAEE_WriteByte(CV_INDEX_LOW_BYTE, 0);
-    DATAEE_WriteByte(CV_OUTPUT_LOC_FLF,  0x01);
-    DATAEE_WriteByte(CV_OUTPUT_LOC_FLR,  0x02);
-    DATAEE_WriteByte(CV_OUTPUT_LOC_FL1,  0x04);
-    DATAEE_WriteByte(CV_OUTPUT_LOC_FL2,  0x08);
-    DATAEE_WriteByte(CV_OUTPUT_LOC_FL3,  0x10);
-    DATAEE_WriteByte(CV_OUTPUT_LOC_FL4,  0x04);
-    DATAEE_WriteByte(CV_OUTPUT_LOC_FL5,  0x08);
-    DATAEE_WriteByte(CV_OUTPUT_LOC_FL6,  0x10);
-    DATAEE_WriteByte(CV_OUTPUT_LOC_FL7,  0x20);
-    DATAEE_WriteByte(CV_OUTPUT_LOC_FL8,  0x40);
-    DATAEE_WriteByte(CV_OUTPUT_LOC_FL9,  0x10);
-    DATAEE_WriteByte(CV_OUTPUT_LOC_FL10, 0x20);
-    DATAEE_WriteByte(CV_OUTPUT_LOC_FL11, 0x40);
-    DATAEE_WriteByte(CV_OUTPUT_LOC_FL12, 0x80);
+    DATAEE_WriteByte(CV_OUTPUT_LOC_F0F,  0x00);
+    DATAEE_WriteByte(CV_OUTPUT_LOC_F0R,  0x01);
+    DATAEE_WriteByte(CV_OUTPUT_LOC_FL1,  0x02);
+    DATAEE_WriteByte(CV_OUTPUT_LOC_FL2,  0x03);
+    DATAEE_WriteByte(CV_OUTPUT_LOC_FL3,  0x04);
+    DATAEE_WriteByte(CV_OUTPUT_LOC_FL4,  0x05);
+    DATAEE_WriteByte(CV_OUTPUT_LOC_FL5,  0x06);
+    DATAEE_WriteByte(CV_OUTPUT_LOC_FL6,  0x07);
+    DATAEE_WriteByte(CV_OUTPUT_LOC_FL7,  0x08);
+    DATAEE_WriteByte(CV_OUTPUT_LOC_FL8,  0x09);
+    DATAEE_WriteByte(CV_OUTPUT_LOC_FL9,  0x0A);
+    DATAEE_WriteByte(CV_OUTPUT_LOC_FL10, 0x0B);
+    DATAEE_WriteByte(CV_OUTPUT_LOC_FL11, 0x0C);
+    DATAEE_WriteByte(CV_OUTPUT_LOC_FL12, 0x0D);
     DATAEE_WriteByte(CV_KICK_START, 0);
     DATAEE_WriteByte(CV_FORWARD_TRIM, 0);
     DATAEE_WriteByte(CV_FORWARD_TRIM, 0);
@@ -201,13 +206,13 @@ void cv_factory_defaults(void) {
     DATAEE_WriteByte(CV_E_MANUFACTURER_VERSION_A, 0);
     DATAEE_WriteByte(CV_E_MANUFACTURER_VERSION_B, 0);
     DATAEE_WriteByte(CV_E_MANUFACTURER_VERSION_C, 0);
-    DATAEE_WriteByte(CV_F0_FX, 0xC0); // Both directions active, always on.
-    DATAEE_WriteByte(CV_F1_FX, 0xC1); // Both directions active, always on.
-    DATAEE_WriteByte(CV_F2_FX, 0xC2); // Both directions active, always on.
-    DATAEE_WriteByte(CV_F3_FX, 0xC3); // Both directions active, always on.
-    DATAEE_WriteByte(CV_F4_FX, 0xC4); // Both directions active, always on.
-    DATAEE_WriteByte(CV_F5_FX, 0xC5); // Both directions active, always on.
-    DATAEE_WriteByte(CV_F6_FX, 0xC6); // Both directions active, always on.
+    DATAEE_WriteByte(CV_F0_FX, 0x00); // Both directions active, always on.
+    DATAEE_WriteByte(CV_F1_FX, 0x00); // Both directions active, always on.
+    DATAEE_WriteByte(CV_F2_FX, 0x00); // Both directions active, always on.
+    DATAEE_WriteByte(CV_F3_FX, 0x00); // Both directions active, always on.
+    DATAEE_WriteByte(CV_F4_FX, 0x00); // Both directions active, always on.
+    DATAEE_WriteByte(CV_F5_FX, 0x00); // Both directions active, always on.
+    DATAEE_WriteByte(CV_F6_FX, 0x00); // Both directions active, always on.
     
     // The entries above are carefully ordered numerically.
     // These two have been pulled out, because they are used
@@ -257,12 +262,14 @@ void cv_check(void) {
         cv_factory_defaults();
     }
     
-    // Load things we want to cache:
-    my_dcc_effects[0] = cv_read(CV_F0_FX);
-    my_dcc_effects[1] = cv_read(CV_F1_FX);
-    my_dcc_effects[2] = cv_read(CV_F2_FX);
-    my_dcc_effects[3] = cv_read(CV_F3_FX);
-    my_dcc_effects[4] = cv_read(CV_F4_FX);
-    my_dcc_effects[5] = cv_read(CV_F5_FX);
-    my_dcc_effects[6] = cv_read(CV_F6_FX);
+    // Cache the effects CV's for use in functions.c
+    cv_effects[0] = cv_read(CV_F0_FX);
+    cv_effects[1] = cv_read(CV_F1_FX);
+    cv_effects[2] = cv_read(CV_F2_FX);
+    cv_effects[3] = cv_read(CV_F3_FX);
+    cv_effects[4] = cv_read(CV_F4_FX);
+    cv_effects[5] = cv_read(CV_F5_FX);
+    cv_effects[6] = cv_read(CV_F6_FX);
+    
 }
+

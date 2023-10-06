@@ -10,13 +10,8 @@
 
 /* DESCRIPTION
  *
- * This file contains routines to manipulate the motor, functions, and other
- * hardware specific outputs.
- * 
- * Assumptions:
- *     - In MCC pin manager, functions have been named IO_F0R, IO_F0F, IO_F1 - IO_F6
- *     - In MCC CWG has been enabeld and connected to the 4 H-Bridge MOSFETS.
- *     - In MCC PWM1 has been configured as the input for CWG.
+ * This file contains routines to control function behavior, including the
+ * function effects.
  * 
  */
 
@@ -28,11 +23,11 @@ extern "C" {
 #endif
 
 #define FUNCTION_MAX 14
+
 /*
  * Function prototypes for our exposed functions.
  */
-void function_control(void);
-
+void function_periodic(void);
 
 #ifdef	__cplusplus
 }

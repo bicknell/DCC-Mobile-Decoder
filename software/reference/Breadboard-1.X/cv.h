@@ -28,14 +28,20 @@
 extern "C" {
 #endif
 
+#include "functions.h"
+
+/*
+ * Exposed global variables.
+ */
+
+uint8_t     cv_effects[FUNCTION_MAX]    = {0};  // Cache of effects.
+
 /*
  * Function prototypes for our exposed functions.
  */
 void    cv_write(uint16_t cv, uint8_t value);
 uint8_t cv_read(uint16_t cv);
-void    cv_factory_defaults(void);
 void    cv_check(void);
-void    cv_reset_next_time(void);
 
 /*
  * CV name to number mapping so we can use more meaningful names in the code.
@@ -76,8 +82,8 @@ void    cv_reset_next_time(void);
 #define CV_ERROR_INFORMATION          30
 #define CV_INDEX_HIGH_BYTE            31
 #define CV_INDEX_LOW_BYTE             32
-#define CV_OUTPUT_LOC_FLF             33
-#define CV_OUTPUT_LOC_FLR             34
+#define CV_OUTPUT_LOC_F0F             33
+#define CV_OUTPUT_LOC_F0R             34
 #define CV_OUTPUT_LOC_FL1             35
 #define CV_OUTPUT_LOC_FL2             36
 #define CV_OUTPUT_LOC_FL3             37
@@ -91,6 +97,15 @@ void    cv_reset_next_time(void);
 #define CV_OUTPUT_LOC_FL11            45
 #define CV_OUTPUT_LOC_FL12            46
                                           /* Manufacturer Unique */
+#define CV_F0_FX                      49  // Digitrax location for compatability.
+#define CV_F1_FX                      50  // Digitrax location for compatability.
+#define CV_F2_FX                      51  // Digitrax location for compatability.
+#define CV_F3_FX                      52  // Digitrax location for compatability.
+#define CV_F4_FX                      53  // Digitrax location for compatability.
+#define CV_F5_FX                      54  // Digitrax location for compatability.
+#define CV_F6_FX                      55  // Digitrax location for compatability.
+                                          /* Manufacturer Unique */
+
 #define CV_KICK_START                 65
 #define CV_FORWARD_TRIM               66
 #define CV_SPEED_TABLE_A              67
@@ -131,13 +146,7 @@ void    cv_reset_next_time(void);
 #define CV_E_MANUFACTURER_VERSION_B  110
 #define CV_E_MANUFACTURER_VERSION_C  111
 
-#define CV_F0_FX                     120
-#define CV_F1_FX                     121
-#define CV_F2_FX                     122
-#define CV_F3_FX                     123
-#define CV_F4_FX                     124
-#define CV_F5_FX                     125
-#define CV_F6_FX                     126
+
                                           /* Reserved for manufacturer use */
 #define CV_INDEX_START               257
 #define CV_INDEX_END                 512

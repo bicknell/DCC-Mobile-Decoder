@@ -65,17 +65,17 @@ void PWM1_16BIT_Initialize(void)
     //PWMERS External Reset Disabled; 
     PWM1ERS = 0x00;
 
-    //PWMCLK FOSC; 
-    PWM1CLK = 0x02;
+    //PWMCLK HFINTOSC; 
+    PWM1CLK = 0x03;
 
     //PWMLDS Autoload disabled; 
     PWM1LDS = 0x00;
 
-    //PWMPRL 255; 
-    PWM1PRL = 0xFF;
+    //PWMPRL 63; 
+    PWM1PRL = 0x3F;
 
-    //PWMPRH 4; 
-    PWM1PRH = 0x04;
+    //PWMPRH 31; 
+    PWM1PRH = 0x1F;
 
     //PWMCPRE No prescale; 
     PWM1CPRE = 0x00;
@@ -92,14 +92,14 @@ void PWM1_16BIT_Initialize(void)
     //PWMPOL2 disabled; PWMPOL1 disabled; PWMPPEN disabled; PWMMODE Left aligned mode; 
     PWM1S1CFG = 0x00;
 
-    //PWMS1P1L 12; 
-    PWM1S1P1L = 0x0C;
+    //PWMS1P1L 0; 
+    PWM1S1P1L = 0x00;
 
     //PWMS1P1H 0; 
     PWM1S1P1H = 0x00;
 
-    //PWMS1P2L 12; 
-    PWM1S1P2L = 0x0C;
+    //PWMS1P2L 0; 
+    PWM1S1P2L = 0x00;
 
     //PWMS1P2H 0; 
     PWM1S1P2H = 0x00;

@@ -10,9 +10,9 @@ Add the following Peripherals in the Resource Management window:
 - ADCC - Used to take analog measurements for BackEMF
 - CWG1 - Used to generate waveforms for the H-Bridge.
 - MEMORY - Used to access the EEPROM memory.
-- PWM1_16BIT - Used to generate a PWM signal for the motor.
+- PWM1_16BIT - Used to generate a PWM signal for CWG1 to route to the motor.
 - TMR0 - Set to fire every 20ms as a periodic timer.
-- TMR2 - Set to fire 80us after being tripped to read the DCC signal.
+- TMR2 - Set to fire 70us after being tripped to read the DCC signal.
 - UART1 - A serial port output for debugging information.
 
 ## Project Properties

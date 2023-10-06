@@ -58,8 +58,8 @@ extern "C" {
 /*
  * Debugging of hardware operations
  */
-#define DEBUG_HW_MOTOR                 0  // Debug motor control operations.
-#define DEBUG_HW_FUNCTION              0  // Debug function control operations.
+#define DEBUG_MOTOR                    0  // Debug motor control operations.
+#define DEBUG_FUNCTION                 0  // Debug function control operations.
     
 #ifdef	__cplusplus
 }

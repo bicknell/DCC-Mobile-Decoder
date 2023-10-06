@@ -59,6 +59,7 @@
 #include "memory.h"
 #include "cwg1.h"
 #include "uart1.h"
+#include "pwm2_16bit.h"
 #include "pwm1_16bit.h"
 
 

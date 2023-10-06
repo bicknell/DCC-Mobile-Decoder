@@ -52,24 +52,26 @@ void motor_control(uint8_t speedsteps, uint8_t speed, uint8_t direction) {
 
     // PWM takes a 16 bit value, but we only have 8 bits of speed.
     PWM1_16BIT_SetSlice1Output1DutyCycleRegister((uint16_t)motor_speed << 8);
+    // Make the PWM re-read the output duty register.
     PWM1_16BIT_LoadBufferRegisters();
 
     // Are we in a consist?
-    if (my_dcc_consist) {
-        motor_direction = direction ^ (my_dcc_consist_ndot ^ my_dcc_ndot);
+    if (dcc_consist) {
+        // TODO: I don't think this is right, should just be consist_ndot?
+        motor_direction = direction ^ (dcc_consist_ndot ^ dcc_ndot);
     // Not in a consist.
     } else {
-        motor_direction = direction ^ my_dcc_ndot;
+        motor_direction = direction ^ dcc_ndot;
     }
  
-    // Toggling the mode[0] bit of CWG1CON1 changes direction of the full
+    // Toggling the mode[0] bit of CWG1CON0 changes direction of the full
     // bridge output.
-    // Reverse
     if (motor_direction) {
+        // Reverse
         CWG1CON0 = CWG1CON0 | 0x01;
-    // Forward
     } else {
         CWG1CON0 = CWG1CON0 & 0xFE;
+        // Forward
     }
 #if DEBUG_MOTOR
     printf("Motor PWM %d/255 direction %c.\r\n", motor_speed, motor_direction ? 'R' : 'F');
