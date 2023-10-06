@@ -5,7 +5,6 @@ to provide a master list of features that decoders might impmement.
 
 Features:
 - [X] 2 or 4 digfit addressing.
-- [X] NDOT - Normal Direction of Travel user selectable.
 - [X] Programming modes.
   - [X] Address Mode (Ops Mode)
   - [X] Register Mode
