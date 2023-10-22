@@ -2,8 +2,8 @@
 
 ## About
 
-The Breadboard-1 design was created to make development of software as
-simple as possible.  The design goals were:
+The Breadboard-1 design was created to make development of software 
+for a PIC18F microcontroller as simple as possible.  The design goals were:
 
 * Serve as a "reference design" for a decoder such that other designs
   could largely be done by omitting unnecessary elements and selecting
