@@ -37,7 +37,7 @@ extern "C" {
 /*
  * Debugging of CV operations
  */
-#define DEBUG_CV_RESET                 0  // Debug when we reset CV's.
+#define DEBUG_CV_RESET                 1  // Debug when we reset CV's.
 #define DEBUG_CV_RW                    0  // Debug CV read/write operations.
     
 /*

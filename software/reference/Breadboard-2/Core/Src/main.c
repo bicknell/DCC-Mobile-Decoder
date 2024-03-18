@@ -23,6 +23,7 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include "dcc.h"
+#include "cv.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -98,7 +99,18 @@ int main(void)
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
 
-  printf("Initializing...\r\n");
+#if DEBUG_STATUS
+    printf("\r\nCompiled on %s at %s using version %s with flags 0x%04X.\r\n",
+           __DATE__, __TIME__, __VERSION__, __OPTIMIZE__);
+#endif
+
+  // Make sure the EEPROM data has been configured.
+  cv_check();
+
+  // Initialize the DCC subsystem based on the CV's configured.
+  dcc_initialize();
+
+  // Start timers.
   HAL_TIM_Base_Start_IT(&htim1);
   HAL_TIM_Base_Start(&htim2);
 
